@@ -186,15 +186,11 @@ function parseCSV(text) {
       arrivalDate: cols[4] || "",
       quantity: cols[5] || "",
 
-      // FIX：你的 SO 欄位是 1 / 空白 → 改成布林判斷
       soStatus: cols[6] === "1" ? "done" : "pending",
-
       quarantineTime: cols[7] || "",
       drugNo: cols[8] || "",
       quarantineCertNo: cols[9] || "",
       stuffingDate: cols[10] || "",
-
-      // FIX：電放單欄位也是 1 / 空白
       telexStatus: cols[11] === "1" ? "done" : "pending"
     });
   }
@@ -236,7 +232,6 @@ function applyFiltersAndRender() {
     return matchKeyword && matchSO && matchTelex;
   });
 
-  // Sorting
   if (currentSortKey) {
     filteredData.sort((a, b) => {
       const va = a[currentSortKey] || "";
@@ -358,17 +353,11 @@ function renderWeekView() {
 
     filteredData.forEach((item) => {
       if (item.clearanceDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-clearance">${t(
-          "legendClearance"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-clearance">${t("legendClearance")}</span>`;
       if (item.sailingTime === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-sailing">${t(
-          "legendSailing"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-sailing">${t("legendSailing")}</span>`;
       if (item.arrivalDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-arrival">${t(
-          "legendArrival"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-arrival">${t("legendArrival")}</span>`;
     });
 
     row.appendChild(cell);
@@ -401,17 +390,11 @@ function renderMonthView() {
 
     filteredData.forEach((item) => {
       if (item.clearanceDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-clearance">${t(
-          "legendClearance"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-clearance">${t("legendClearance")}</span>`;
       if (item.sailingTime === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-sailing">${t(
-          "legendSailing"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-sailing">${t("legendSailing")}</span>`;
       if (item.arrivalDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-arrival">${t(
-          "legendArrival"
-        )}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-arrival">${t("legendArrival")}</span>`;
     });
 
     box.appendChild(cell);
@@ -444,30 +427,6 @@ function formatDate(d) {
 }
 
 /* -----------------------------------------------------
-   Calendar Navigation
------------------------------------------------------ */
-document.getElementById("btn-prev-period").addEventListener("click", () => {
-  currentDate =
-    calendarView === "week"
-      ? addDays(currentDate, -7)
-      : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-  renderCalendar();
-});
-
-document.getElementById("btn-next-period").addEventListener("click", () => {
-  currentDate =
-    calendarView === "week"
-      ? addDays(currentDate, 7)
-      : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-  renderCalendar();
-});
-
-document.getElementById("btn-today").addEventListener("click", () => {
-  currentDate = new Date();
-  renderCalendar();
-});
-
-/* -----------------------------------------------------
    Initialize System
 ----------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
@@ -480,5 +439,29 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("filter-so").addEventListener("change", applyFiltersAndRender);
   document.getElementById("filter-telex").addEventListener("change", applyFiltersAndRender);
 
-  setInterval(loadSheetData, 180000); // auto refresh
+  /* -----------------------------------------------------
+     修復：行事曆按鈕要在 DOM 載入後才能綁定
+  ----------------------------------------------------- */
+  document.getElementById("btn-prev-period").addEventListener("click", () => {
+    currentDate =
+      calendarView === "week"
+        ? addDays(currentDate, -7)
+        : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    renderCalendar();
+  });
+
+  document.getElementById("btn-next-period").addEventListener("click", () => {
+    currentDate =
+      calendarView === "week"
+        ? addDays(currentDate, 7)
+        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    renderCalendar();
+  });
+
+  document.getElementById("btn-today").addEventListener("click", () => {
+    currentDate = new Date();
+    renderCalendar();
+  });
+
+  setInterval(loadSheetData, 180000); // auto refresh every 3 min
 });
