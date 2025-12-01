@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>船班訂艙與檢疫追蹤系統</title>
+  <meta name="theme-color" content="#f5f5f7" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header-main">
+      <div class="app-logo">📦</div>
+      <div>
+        <div class="app-title">船班訂艙與檢疫追蹤系統</div>
+        <div class="app-subtitle">同步 Google Sheet，讓報關行即時掌握船班與文件狀態</div>
+      </div>
+    </div>
+    <div class="app-header-meta">
+      <span class="badge badge-soft">只讀・自動更新</span>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="card card-controls">
+      <div class="controls-left">
+        <div class="tabs">
+          <button class="tab-button active" data-target="table-view">表格視圖</button>
+          <button class="tab-button" data-target="calendar-view">行事曆視圖</button>
+        </div>
+      </div>
+      <div class="controls-right">
+        <div class="search-group">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="搜尋船名、船班、港口、藥務號、檢疫證號..."
+          />
+        </div>
+        <div class="filter-group">
+          <label>
+            SO 狀態：
+            <select id="filter-so">
+              <option value="all">全部</option>
+              <option value="done">已給 SO</option>
+              <option value="pending">尚未給 SO</option>
+            </select>
+          </label>
+          <label>
+            電放單狀態：
+            <select id="filter-telex">
+              <option value="all">全部</option>
+              <option value="done">已給 電放單</option>
+              <option value="pending">尚未給 電放單</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 表格視圖 -->
+    <section id="table-view" class="card view active">
+      <div class="card-header">
+        <div>
+          <h2>船班列表</h2>
+          <p class="card-desc">點欄位標題可排序，SO / 電放單會自動判斷是否已提供。</p>
+        </div>
+        <div class="card-header-meta">
+          <span class="hint-dot"></span>
+          <span class="hint-text">資料來源：Google Sheet CSV（唯讀）</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="shipment-table">
+          <thead>
+            <tr>
+              <th data-sort-key="vessel">船班</th>
+              <th data-sort-key="clearanceDate">結關日</th>
+              <th data-sort-key="sailingTime">實際開船時間</th>
+              <th data-sort-key="port">抵達港口</th>
+              <th data-sort-key="arrivalDate">抵達日</th>
+              <th data-sort-key="quantity">訂櫃數量</th>
+              <th data-sort-key="soStatus">SO 狀態</th>
+              <th data-sort-key="quarantineTime">申請檢疫官到場時間</th>
+              <th data-sort-key="drugNo">藥務號</th>
+              <th data-sort-key="quarantineCertNo">檢疫證號碼</th>
+              <th data-sort-key="stuffingDate">實際裝櫃日</th>
+              <th data-sort-key="telexStatus">電放單狀態</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- 由 script.js 注入 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 行事曆視圖 -->
+    <section id="calendar-view" class="card view">
+      <div class="card-header calendar-header">
+        <div>
+          <h2>行事曆</h2>
+          <p class="card-desc">可切換週 / 月視圖，顏色區分結關、開船、抵達時間。</p>
+        </div>
+
+        <div class="calendar-top-controls">
+          <div class="calendar-tabs">
+            <button class="subtab-button active" data-cal-view="week">週視圖</button>
+            <button class="subtab-button" data-cal-view="month">月視圖</button>
+          </div>
+          <div class="calendar-nav">
+            <button class="btn btn-ghost" id="btn-prev-period">◀</button>
+            <button class="btn btn-ghost" id="btn-today">今天</button>
+            <button class="btn btn-ghost" id="btn-next-period">▶</button>
+            <span class="calendar-period-label" id="period-label"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-legend">
+        <span class="legend-item">
+          <span class="legend-dot legend-clearance"></span> 結關日
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot legend-sailing"></span> 實際開船時間
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot legend-arrival"></span> 抵達日
+        </span>
+      </div>
+
+      <div class="calendar-grid" id="calendar-grid">
+        <!-- 由 script.js 注入 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- 詳細資訊 Modal -->
+  <div class="modal-backdrop" id="detail-modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <dl id="modal-detail-list"></dl>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <span>資料來源：Google Sheet（唯讀）</span>
+    <span class="dot">•</span>
+    <span>頁面將自動每 3 分鐘重新整理資料</span>
+  </footer>
+
+  <script>
+    window.SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPCnYDQ7Z68xF_BtbDDM3ttAxlzq-Wa_zGQR_TTs2yPemTQuegsXgWl7kEgv6qJ2ut3ASPQ_Q-KnSq/pub?gid=994272775&single=true&output=csv";
+  </script>
+  <script src="script.js" defer></script>
+</body>
+</html>
