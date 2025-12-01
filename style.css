@@ -1,4 +1,6 @@
-/* Apple 風格：乾淨、淺色、圓角、柔和陰影 */
+/* ------------------------------
+   Base Apple Style Variables
+------------------------------ */
 :root {
   --bg: #f5f5f7;
   --card-bg: #ffffff;
@@ -9,16 +11,19 @@
   --accent: #0a84ff;
   --accent-soft: #e5f2ff;
   --accent-strong: #0060df;
-  --danger-bg: #ffe2e0;
-  --danger-text: #b00020;
+
   --success-bg: #daf6dd;
   --success-text: #058b35;
+  --danger-bg: #ffe2e0;
+  --danger-text: #b00020;
+
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.08);
   --radius-card: 18px;
   --radius-pill: 999px;
+
   --event-clearance: #0a84ff; /* 藍 */
-  --event-sailing: #ff9f0a;   /* 橘 */
-  --event-arrival: #34c759;   /* 綠 */
+  --event-sailing: #ff9f0a; /* 橘 */
+  --event-arrival: #34c759; /* 綠 */
 }
 
 *,
@@ -36,7 +41,9 @@ body {
   color: var(--text-main);
 }
 
-/* Header */
+/* ------------------------------
+   Header Area
+------------------------------ */
 
 .app-header {
   position: sticky;
@@ -87,7 +94,7 @@ body {
 
 .badge {
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -97,11 +104,13 @@ body {
   color: #0856a6;
 }
 
-/* Language toggle (segmented) */
+/* ------------------------------
+   Language Toggle (Segmented)
+------------------------------ */
 
 .lang-toggle {
   background: rgba(250, 250, 252, 0.9);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(210, 210, 215, 0.9);
   padding: 2px;
   display: inline-flex;
@@ -111,7 +120,7 @@ body {
   border: none;
   background: transparent;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.8rem;
   cursor: pointer;
   color: var(--text-muted);
@@ -124,7 +133,9 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* Main layout */
+/* ------------------------------
+   Layout / Main Container
+------------------------------ */
 
 .app-main {
   max-width: 1200px;
@@ -132,7 +143,9 @@ body {
   padding: 16px;
 }
 
-/* Cards */
+/* ------------------------------
+   Cards
+------------------------------ */
 
 .card {
   background: rgba(255, 255, 255, 0.96);
@@ -176,8 +189,9 @@ body {
   border-radius: 50%;
   background: #30d158;
 }
-
-/* Controls section */
+/* ------------------------------
+   Controls Section
+------------------------------ */
 
 .card-controls {
   display: flex;
@@ -201,6 +215,8 @@ body {
   justify-content: flex-end;
 }
 
+/* Search Bar */
+
 .search-group {
   position: relative;
   min-width: 260px;
@@ -209,7 +225,7 @@ body {
 .search-group input {
   width: 100%;
   padding: 7px 10px 7px 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
   font-size: 0.85rem;
   background: rgba(255, 255, 255, 0.9);
@@ -229,6 +245,8 @@ body {
   font-size: 0.85rem;
 }
 
+/* Filter Group */
+
 .filter-group {
   display: flex;
   gap: 8px;
@@ -240,19 +258,21 @@ body {
 .filter-group select {
   margin-left: 3px;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.9);
   font-size: 0.8rem;
 }
 
-/* Tabs */
+/* ------------------------------
+   Tabs
+------------------------------ */
 
 .tabs {
   display: inline-flex;
   padding: 3px;
   background: rgba(250, 250, 252, 0.9);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(210, 210, 215, 0.9);
 }
 
@@ -260,7 +280,7 @@ body {
   border: none;
   background: transparent;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
   cursor: pointer;
   color: var(--text-muted);
@@ -273,7 +293,9 @@ body {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 }
 
-/* Views */
+/* ------------------------------
+   Views
+------------------------------ */
 
 .view {
   display: none;
@@ -283,7 +305,9 @@ body {
   display: block;
 }
 
-/* Table */
+/* ------------------------------
+   Table Design
+------------------------------ */
 
 .table-wrapper {
   width: 100%;
@@ -337,7 +361,7 @@ tr:hover td {
   background: #fafafa;
 }
 
-/* Status chips */
+/* Status Chips */
 
 .chip {
   display: inline-flex;
@@ -366,10 +390,12 @@ tr:hover td {
   color: var(--danger-text);
 }
 
-/* Buttons */
+/* ------------------------------
+   Buttons
+------------------------------ */
 
 .btn {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
   background: #f5f5f7;
   padding: 4px 10px;
@@ -387,8 +413,9 @@ tr:hover td {
 .btn:hover {
   background: #e5e5ea;
 }
-
-/* Calendar */
+/* ------------------------------
+   Calendar Section
+------------------------------ */
 
 .calendar-header {
   flex-wrap: wrap;
@@ -403,7 +430,7 @@ tr:hover td {
 
 .calendar-tabs {
   background: rgba(245, 245, 247, 0.9);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px;
   border: 1px solid rgba(210, 210, 215, 0.9);
   display: inline-flex;
@@ -413,7 +440,7 @@ tr:hover td {
   border: none;
   background: transparent;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.8rem;
   cursor: pointer;
   color: var(--text-muted);
@@ -441,15 +468,13 @@ tr:hover td {
 
 .calendar-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
+  margin: 10px 0;
   font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
 }
 
 .legend-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
 }
@@ -463,86 +488,105 @@ tr:hover td {
 .legend-clearance {
   background: var(--event-clearance);
 }
+
 .legend-sailing {
   background: var(--event-sailing);
 }
+
 .legend-arrival {
   background: var(--event-arrival);
 }
 
-/* Calendar grid */
+/* Calendar Grid */
 
 .calendar-grid {
+  margin-top: 12px;
   border-radius: 14px;
+  overflow: hidden;
   border: 1px solid var(--border-subtle);
-  overflow: auto;
+  background: #ffffff;
 }
 
-/* Week view */
+/* Week View */
 
-.calendar-row {
+.calendar-week {
   display: grid;
-  grid-template-columns: 70px repeat(7, minmax(110px, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   border-bottom: 1px solid var(--border-subtle);
-  min-width: 900px;
 }
 
-.calendar-row:last-child {
-  border-bottom: none;
-}
-
-.calendar-label,
-.calendar-cell {
-  border-right: 1px solid var(--border-subtle);
+.calendar-weekday {
   padding: 6px;
-  font-size: 0.8rem;
-  min-height: 60px;
+  background: #f9fafc;
+  border-right: 1px solid var(--border-subtle);
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-.calendar-row .calendar-cell:last-child {
+.calendar-weekday:last-child {
   border-right: none;
 }
 
-.calendar-label {
-  background: #f9fafc;
-  font-weight: 600;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Week Cells */
 
-.calendar-header-row {
-  background: #f5f5f7;
-}
-
-.calendar-header-row .calendar-cell {
-  text-align: center;
+.calendar-week-cell {
+  min-height: 90px;
   border-right: 1px solid var(--border-subtle);
-}
-
-.day-name {
-  display: block;
-}
-
-.day-date {
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  position: relative;
 }
 
-/* Events pills */
+.calendar-week-cell:last-child {
+  border-right: none;
+}
 
-.event-pill {
-  border-radius: 9px;
-  padding: 3px 6px;
+.calendar-week-cell .day-number {
+  font-weight: bold;
   margin-bottom: 4px;
+}
+
+/* Month View */
+
+.calendar-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-month-cell {
+  min-height: 100px;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px;
   font-size: 0.75rem;
+}
+
+.calendar-month-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-month-cell .day-number {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* Calendar Event Chips */
+
+.calendar-event {
+  display: block;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin-bottom: 2px;
+  border-radius: var(--radius-pill);
   color: #ffffff;
   cursor: pointer;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  opacity: 0.92;
+}
+
+.calendar-event:hover {
+  opacity: 1;
 }
 
 .event-clearance {
@@ -557,60 +601,19 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
-.event-pill small {
-  font-size: 0.7rem;
-  opacity: 0.9;
-}
-
-/* Month view */
-
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(120px, 1fr));
-  min-width: 900px;
-  border-top: 1px solid var(--border-subtle);
-  border-left: 1px solid var(--border-subtle);
-}
-
-.month-cell {
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-  min-height: 90px;
-  padding: 4px;
-  font-size: 0.78rem;
-  position: relative;
-}
-
-.month-cell-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.month-cell-date {
-  font-weight: 600;
-}
-
-.month-cell-date--muted {
-  color: var(--text-muted);
-}
-
-.month-cell-events {
-  max-height: 70px;
-  overflow: hidden;
-}
-
-/* Modal */
+/* ------------------------------
+   Modal
+------------------------------ */
 
 .modal-backdrop {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
-  display: none;
+  backdrop-filter: blur(4px);
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 999;
 }
 
 .modal-backdrop.active {
@@ -619,33 +622,47 @@ tr:hover td {
 
 .modal {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  max-width: 420px;
-  width: calc(100% - 32px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-  font-size: 0.9rem;
-  border: 1px solid rgba(210, 210, 215, 0.9);
+  width: 92%;
+  max-width: 480px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  animation: pop-in 0.18s ease-out;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
 }
 
 .modal-title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
 }
 
 .modal-close {
   border: none;
   background: transparent;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   cursor: pointer;
-  color: var(--text-muted);
+}
+
+.modal-body {
+  padding: 16px 18px;
 }
 
 .modal-body dl {
@@ -653,86 +670,64 @@ tr:hover td {
 }
 
 .modal-body dt {
-  font-weight: 600;
-  margin-top: 6px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
+  margin-top: 8px;
 }
 
 .modal-body dd {
-  margin: 0;
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-/* Footer */
+/* ------------------------------
+   Footer
+------------------------------ */
 
 .app-footer {
-  max-width: 1200px;
-  margin: 0 auto 16px;
-  padding: 0 16px;
+  text-align: center;
+  padding: 20px 0 30px;
   font-size: 0.75rem;
   color: var(--text-muted);
-  display: flex;
-  gap: 6px;
-  align-items: center;
 }
 
 .app-footer .dot {
-  font-size: 0.6rem;
+  margin: 0 6px;
 }
 
-/* Responsive */
+/* ------------------------------
+   Responsive Adjustments
+------------------------------ */
 
-@media (max-width: 900px) {
-  .app-main {
-    padding: 12px;
-  }
-
+@media (max-width: 880px) {
   .card-controls {
     flex-direction: column;
     align-items: stretch;
   }
 
   .controls-right {
-    justify-content: flex-start;
+    justify-content: space-between;
   }
 
-  .table-wrapper table,
-  .calendar-grid,
-  .month-grid {
-    min-width: 700px;
-  }
-
-  .calendar-row {
-    grid-template-columns: 60px repeat(7, minmax(90px, 1fr));
+  .table-wrapper {
+    overflow-x: auto;
   }
 }
 
 @media (max-width: 600px) {
   .app-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
+    padding: 10px 16px;
   }
 
-  .card {
-    padding: 12px;
-  }
-
-  .card-controls {
-    padding: 10px 12px;
+  .controls-right {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .search-group {
-    min-width: 100%;
-  }
-
-  .filter-group {
     width: 100%;
-    justify-content: space-between;
-  }
-
-  .app-header-meta {
-    width: 100%;
-    justify-content: space-between;
   }
 }
