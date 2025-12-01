@@ -5,7 +5,6 @@ let rawData = [];
 let filteredData = [];
 let currentSortKey = null;
 let currentSortOrder = "asc";
-
 let currentLang = localStorage.getItem("lang") || "zh";
 
 /* Calendar State */
@@ -56,8 +55,6 @@ const i18n = {
     legendClearance: "結關",
     legendSailing: "開船",
     legendArrival: "抵達",
-
-    modalClose: "關閉",
 
     footerSource: "資料來源：Google Sheet（唯讀）",
     footerAutoRefresh: "頁面每 3 分鐘自動更新",
@@ -111,8 +108,6 @@ const i18n = {
     legendSailing: "出港",
     legendArrival: "到着",
 
-    modalClose: "閉じる",
-
     footerSource: "データ元：Google Sheet（閲覧専用）",
     footerAutoRefresh: "ページは 3 分ごとに自動更新",
 
@@ -126,7 +121,7 @@ const i18n = {
 };
 
 /* -----------------------------------------------------
-   Translation Helper
+   Helper：取得翻譯
 ----------------------------------------------------- */
 function t(key) {
   return i18n[currentLang][key] || key;
@@ -134,29 +129,18 @@ function t(key) {
 
 function applyTranslations() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const key = el.dataset.i18n;
-    el.textContent = t(key);
+    el.textContent = t(el.dataset.i18n);
   });
-
-  // Update placeholders
-  const searchInput = document.getElementById("search-input");
-  if (searchInput) {
-    searchInput.placeholder =
-      currentLang === "ja"
-        ? "船名、港、薬務番号、検疫証番号などを検索..."
-        : "搜尋船名、船班、港口、藥務號、檢疫證號...";
-  }
 }
 
 /* -----------------------------------------------------
-   Language Switching
+   語言切換
 ----------------------------------------------------- */
 function setupLanguageToggle() {
   document.querySelectorAll(".lang-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const lang = btn.dataset.lang;
-      currentLang = lang;
-      localStorage.setItem("lang", lang);
+      currentLang = btn.dataset.lang;
+      localStorage.setItem("lang", currentLang);
 
       document.querySelectorAll(".lang-btn").forEach((b) =>
         b.classList.remove("active")
@@ -168,14 +152,10 @@ function setupLanguageToggle() {
       renderCalendar();
     });
   });
-
-  document
-    .querySelector(`.lang-btn[data-lang="${currentLang}"]`)
-    ?.classList.add("active");
 }
 
 /* -----------------------------------------------------
-   Load CSV from Google Sheet
+   載入 Google Sheet CSV
 ----------------------------------------------------- */
 async function loadSheetData() {
   try {
@@ -186,80 +166,81 @@ async function loadSheetData() {
     applyFiltersAndRender();
     renderCalendar();
   } catch (err) {
-    console.error("載入 Google Sheet 失敗：", err);
-    alert("無法載入 Google Sheet 資料，請確認 CSV 連結是否正確與公開。");
+    console.error("CSV 載入失敗：", err);
   }
 }
 
 /* CSV Parser */
 function parseCSV(text) {
   const lines = text.trim().split("\n");
-  const headers = lines[0].split(",");
+  const rows = [];
 
-  return lines.slice(1).map((line) => {
-    const cols = line.split(",");
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",");
 
-    return {
+    rows.push({
       vessel: cols[0] || "",
       clearanceDate: cols[1] || "",
       sailingTime: cols[2] || "",
       port: cols[3] || "",
       arrivalDate: cols[4] || "",
       quantity: cols[5] || "",
-      soStatus: cols[6] || "",
+
+      // FIX：你的 SO 欄位是 1 / 空白 → 改成布林判斷
+      soStatus: cols[6] === "1" ? "done" : "pending",
+
       quarantineTime: cols[7] || "",
       drugNo: cols[8] || "",
       quarantineCertNo: cols[9] || "",
       stuffingDate: cols[10] || "",
-      telexStatus: cols[11] || ""
-    };
-  });
+
+      // FIX：電放單欄位也是 1 / 空白
+      telexStatus: cols[11] === "1" ? "done" : "pending"
+    });
+  }
+
+  return rows;
 }
 
 /* -----------------------------------------------------
-   Table Rendering
+   篩選 + 搜尋
 ----------------------------------------------------- */
 function applyFiltersAndRender() {
-  const searchInput = document.getElementById("search-input");
-  const filterSo = document.getElementById("filter-so");
-  const filterTelex = document.getElementById("filter-telex");
+  const keyword = (document.getElementById("search-input")?.value || "")
+    .trim()
+    .toLowerCase();
 
-  if (!searchInput || !filterSo || !filterTelex) {
-    console.warn("DOM 尚未準備好，跳過渲染");
-    return;
-  }
-
-  const keyword = searchInput.value.trim().toLowerCase();
+  const soFilter = document.getElementById("filter-so")?.value || "all";
+  const telexFilter = document.getElementById("filter-telex")?.value || "all";
 
   filteredData = rawData.filter((row) => {
     const matchKeyword =
       row.vessel.toLowerCase().includes(keyword) ||
       row.port.toLowerCase().includes(keyword) ||
-      row.drugNo.toLowerCase().includes(keyword) ||
-      row.quarantineCertNo.toLowerCase().includes(keyword);
+      row.drugNo.toLowerCase().includes(keyword);
 
     const matchSO =
-      filterSo.value === "all"
+      soFilter === "all"
         ? true
-        : filterSo.value === "done"
-        ? row.soStatus.includes("已") || row.soStatus.includes("済")
-        : row.soStatus.includes("未");
+        : soFilter === "done"
+        ? row.soStatus === "done"
+        : row.soStatus === "pending";
 
     const matchTelex =
-      filterTelex.value === "all"
+      telexFilter === "all"
         ? true
-        : filterTelex.value === "done"
-        ? row.telexStatus.includes("已") || row.telexStatus.includes("済")
-        : row.telexStatus.includes("未");
+        : telexFilter === "done"
+        ? row.telexStatus === "done"
+        : row.telexStatus === "pending";
 
     return matchKeyword && matchSO && matchTelex;
   });
 
+  // Sorting
   if (currentSortKey) {
     filteredData.sort((a, b) => {
       const va = a[currentSortKey] || "";
       const vb = b[currentSortKey] || "";
-
       return currentSortOrder === "asc"
         ? va.localeCompare(vb)
         : vb.localeCompare(va);
@@ -269,11 +250,14 @@ function applyFiltersAndRender() {
   renderTable();
 }
 
+/* -----------------------------------------------------
+   渲染表格
+----------------------------------------------------- */
 function renderTable() {
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
 
-  filteredData.forEach((row, index) => {
+  filteredData.forEach((row) => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -285,10 +269,8 @@ function renderTable() {
       <td>${row.quantity}</td>
 
       <td>${renderStatusChip(
-        row.soStatus.includes("未") ? "bad" : "ok",
-        row.soStatus.includes("未")
-          ? t("statusSOpending")
-          : t("statusSOdone")
+        row.soStatus === "done" ? "ok" : "bad",
+        row.soStatus === "done" ? t("statusSOdone") : t("statusSOpending")
       )}</td>
 
       <td>${row.quarantineTime || t("emptyValue")}</td>
@@ -297,14 +279,12 @@ function renderTable() {
       <td>${row.stuffingDate || t("emptyValue")}</td>
 
       <td>${renderStatusChip(
-        row.telexStatus.includes("未") ? "bad" : "ok",
-        row.telexStatus.includes("未")
-          ? t("statusTelexPending")
-          : t("statusTelexDone")
+        row.telexStatus === "done" ? "ok" : "bad",
+        row.telexStatus === "done"
+          ? t("statusTelexDone")
+          : t("statusTelexPending")
       )}</td>
     `;
-
-    tr.addEventListener("click", () => openModal(row));
 
     tbody.appendChild(tr);
   });
@@ -333,9 +313,10 @@ function setupSorting() {
         currentSortOrder = "asc";
       }
 
-      document.querySelectorAll("th[data-sort-key]").forEach((h) =>
-        h.removeAttribute("data-sort-active")
-      );
+      document
+        .querySelectorAll("th[data-sort-key]")
+        .forEach((el) => el.removeAttribute("data-sort-active"));
+
       th.setAttribute("data-sort-active", currentSortOrder);
 
       applyFiltersAndRender();
@@ -344,37 +325,7 @@ function setupSorting() {
 }
 
 /* -----------------------------------------------------
-   Modal
------------------------------------------------------ */
-function openModal(row) {
-  const modal = document.getElementById("detail-modal-backdrop");
-  const list = document.getElementById("modal-detail-list");
-
-  modal.classList.add("active");
-
-  document.getElementById("modal-title").textContent = row.vessel;
-
-  list.innerHTML = `
-    <dt>${t("colClearanceDate")}</dt><dd>${row.clearanceDate}</dd>
-    <dt>${t("colSailingTime")}</dt><dd>${row.sailingTime}</dd>
-    <dt>${t("colArrivalDate")}</dt><dd>${row.arrivalDate}</dd>
-    <dt>${t("colPort")}</dt><dd>${row.port}</dd>
-    <dt>${t("colQuantity")}</dt><dd>${row.quantity}</dd>
-    <dt>${t("colSOstatus")}</dt><dd>${row.soStatus}</dd>
-    <dt>${t("colQuarantineTime")}</dt><dd>${row.quarantineTime}</dd>
-    <dt>${t("colDrugNo")}</dt><dd>${row.drugNo}</dd>
-    <dt>${t("colQuarantineCertNo")}</dt><dd>${row.quarantineCertNo}</dd>
-    <dt>${t("colStuffingDate")}</dt><dd>${row.stuffingDate}</dd>
-    <dt>${t("colTelexStatus")}</dt><dd>${row.telexStatus}</dd>
-  `;
-}
-
-document.getElementById("modal-close-btn").addEventListener("click", () => {
-  document.getElementById("detail-modal-backdrop").classList.remove("active");
-});
-
-/* -----------------------------------------------------
-   Calendar Rendering
+   Simple Calendar（週 + 月）
 ----------------------------------------------------- */
 function renderCalendar() {
   const grid = document.getElementById("calendar-grid");
@@ -386,45 +337,38 @@ function renderCalendar() {
 
 function renderWeekView() {
   const grid = document.getElementById("calendar-grid");
-  grid.innerHTML = "";
 
   const start = startOfWeek(currentDate);
-  const weekDates = [...Array(7)].map((_, i) => addDays(start, i));
+  const days = [...Array(7)].map((_, i) => addDays(start, i));
 
   const header = document.createElement("div");
   header.className = "calendar-week";
-  header.innerHTML = weekDates
-    .map(
-      (d) =>
-        `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`
-    )
+  header.innerHTML = days
+    .map((d) => `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`)
     .join("");
   grid.appendChild(header);
 
   const row = document.createElement("div");
   row.className = "calendar-week";
 
-  weekDates.forEach((date) => {
+  days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-week-cell";
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach((item) => {
-      if (item.clearanceDate === formatDate(date)) {
+      if (item.clearanceDate === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-clearance">${t(
           "legendClearance"
         )}</span>`;
-      }
-      if (item.sailingTime === formatDate(date)) {
+      if (item.sailingTime === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-sailing">${t(
           "legendSailing"
         )}</span>`;
-      }
-      if (item.arrivalDate === formatDate(date)) {
+      if (item.arrivalDate === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-arrival">${t(
           "legendArrival"
         )}</span>`;
-      }
     });
 
     row.appendChild(cell);
@@ -432,19 +376,17 @@ function renderWeekView() {
 
   grid.appendChild(row);
 
-  document.getElementById("period-label").textContent = `${formatDate(
-    weekDates[0]
-  )} - ${formatDate(weekDates[6])}`;
+  document.getElementById("period-label").textContent =
+    `${formatDate(days[0])} - ${formatDate(days[6])}`;
 }
 
 function renderMonthView() {
   const grid = document.getElementById("calendar-grid");
-  grid.innerHTML = "";
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
 
-  const first = new Date(year, month, 1);
+  const first = new Date(y, m, 1);
   const start = startOfWeek(first);
 
   const days = [...Array(42)].map((_, i) => addDays(start, i));
@@ -458,21 +400,18 @@ function renderMonthView() {
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach((item) => {
-      if (item.clearanceDate === formatDate(date)) {
+      if (item.clearanceDate === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-clearance">${t(
           "legendClearance"
         )}</span>`;
-      }
-      if (item.sailingTime === formatDate(date)) {
+      if (item.sailingTime === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-sailing">${t(
           "legendSailing"
         )}</span>`;
-      }
-      if (item.arrivalDate === formatDate(date)) {
+      if (item.arrivalDate === formatDate(date))
         cell.innerHTML += `<span class="calendar-event event-arrival">${t(
           "legendArrival"
         )}</span>`;
-      }
     });
 
     box.appendChild(cell);
@@ -480,7 +419,7 @@ function renderMonthView() {
 
   grid.appendChild(box);
 
-  document.getElementById("period-label").textContent = `${year}/${month + 1}`;
+  document.getElementById("period-label").textContent = `${y}/${m + 1}`;
 }
 
 /* -----------------------------------------------------
@@ -508,16 +447,18 @@ function formatDate(d) {
    Calendar Navigation
 ----------------------------------------------------- */
 document.getElementById("btn-prev-period").addEventListener("click", () => {
-  if (calendarView === "week") currentDate = addDays(currentDate, -7);
-  else currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-
+  currentDate =
+    calendarView === "week"
+      ? addDays(currentDate, -7)
+      : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   renderCalendar();
 });
 
 document.getElementById("btn-next-period").addEventListener("click", () => {
-  if (calendarView === "week") currentDate = addDays(currentDate, 7);
-  else currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-
+  currentDate =
+    calendarView === "week"
+      ? addDays(currentDate, 7)
+      : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
   renderCalendar();
 });
 
@@ -527,57 +468,17 @@ document.getElementById("btn-today").addEventListener("click", () => {
 });
 
 /* -----------------------------------------------------
-   Calendar View Switching
------------------------------------------------------ */
-document.querySelectorAll(".subtab-button").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".subtab-button")
-      .forEach((b) => b.classList.remove("active"));
-
-    btn.classList.add("active");
-    calendarView = btn.dataset.calView;
-
-    renderCalendar();
-  });
-});
-
-/* -----------------------------------------------------
-   Tab Switching
------------------------------------------------------ */
-document.querySelectorAll(".tab-button").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".tab-button")
-      .forEach((b) => b.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    document
-      .querySelectorAll(".view")
-      .forEach((v) => v.classList.remove("active"));
-
-    const target = btn.dataset.target;
-    document.getElementById(target).classList.add("active");
-
-    renderCalendar();
-  });
-});
-
-/* -----------------------------------------------------
    Initialize System
 ----------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
   setupLanguageToggle();
   applyTranslations();
   setupSorting();
+  loadSheetData();
 
   document.getElementById("search-input").addEventListener("input", applyFiltersAndRender);
   document.getElementById("filter-so").addEventListener("change", applyFiltersAndRender);
   document.getElementById("filter-telex").addEventListener("change", applyFiltersAndRender);
 
-  loadSheetData();
-
-  // Refresh every 3 minutes
-  setInterval(loadSheetData, 180000);
+  setInterval(loadSheetData, 180000); // auto refresh
 });
