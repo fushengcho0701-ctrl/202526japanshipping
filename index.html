@@ -7,25 +7,36 @@
   <meta name="theme-color" content="#f5f5f7" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+
+  <!-- ===== Header（含語言切換） ===== -->
   <header class="app-header">
     <div class="app-header-main">
       <div class="app-logo">📦</div>
       <div>
         <div class="app-title" data-i18n="appTitle">船班訂艙與檢疫追蹤系統</div>
-        <div class="app-subtitle" data-i18n="appSubtitle">同步 Google Sheet，讓報關行即時掌握船班與文件狀態</div>
+        <div class="app-subtitle" data-i18n="appSubtitle">
+          同步 Google Sheet，讓報關行即時掌握船班與文件狀態
+        </div>
       </div>
     </div>
+
     <div class="app-header-meta">
       <span class="badge badge-soft" data-i18n="badgeReadonly">只讀・自動更新</span>
-      <div class="lang-toggle" aria-label="Language switch">
+
+      <!-- Apple Segmented 語言切換 -->
+      <div class="lang-toggle">
         <button class="lang-btn active" data-lang="zh">中文</button>
         <button class="lang-btn" data-lang="ja">日本語</button>
       </div>
     </div>
   </header>
 
+  <!-- ===== Main Content ===== -->
   <main class="app-main">
+
+    <!-- === 上方控制列：搜尋、篩選、視圖切換 === -->
     <section class="card card-controls">
       <div class="controls-left">
         <div class="tabs">
@@ -33,15 +44,17 @@
           <button class="tab-button" data-target="calendar-view" data-i18n="tabCalendar">行事曆視圖</button>
         </div>
       </div>
+
       <div class="controls-right">
+
+        <!-- 搜尋 -->
         <div class="search-group">
           <span class="search-icon">🔍</span>
-          <input
-            type="text"
-            id="search-input"
-            placeholder="搜尋船名、船班、港口、藥務號、檢疫證號..."
-          />
+          <input type="text" id="search-input"
+            placeholder="搜尋船名、船班、港口、藥務號、檢疫證號..." />
         </div>
+
+        <!-- 篩選 -->
         <div class="filter-group">
           <label data-i18n="filterSO">
             SO 狀態：
@@ -51,6 +64,7 @@
               <option value="pending" data-i18n="filterSOpending">尚未給 SO</option>
             </select>
           </label>
+
           <label data-i18n="filterTelex">
             電放單狀態：
             <select id="filter-telex">
@@ -60,16 +74,18 @@
             </select>
           </label>
         </div>
+
       </div>
     </section>
 
-    <!-- 表格視圖 -->
+    <!-- === 表格視圖 === -->
     <section id="table-view" class="card view active">
       <div class="card-header">
         <div>
           <h2 data-i18n="tableTitle">船班列表</h2>
-          <p class="card-desc" data-i18n="tableDesc">點欄位標題可排序，SO / 電放單會自動判斷是否已提供。</p>
+          <p class="card-desc" data-i18n="tableDesc">點欄位標題可排序，SO / 電放單會自動判斷。</p>
         </div>
+
         <div class="card-header-meta">
           <span class="hint-dot"></span>
           <span class="hint-text" data-i18n="hintSource">資料來源：Google Sheet CSV（唯讀）</span>
@@ -94,19 +110,19 @@
               <th data-sort-key="telexStatus" data-i18n="colTelexStatus">電放單狀態</th>
             </tr>
           </thead>
-          <tbody id="table-body">
-            <!-- 由 script.js 注入 -->
-          </tbody>
+
+          <tbody id="table-body"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- 行事曆視圖 -->
+    <!-- === 行事曆視圖 === -->
     <section id="calendar-view" class="card view">
       <div class="card-header calendar-header">
+
         <div>
           <h2 data-i18n="calTitle">行事曆</h2>
-          <p class="card-desc" data-i18n="calDesc">可切換週 / 月視圖，顏色區分結關、開船、抵達時間。</p>
+          <p class="card-desc" data-i18n="calDesc">週 / 月視圖切換，顏色代表不同事件。</p>
         </div>
 
         <div class="calendar-top-controls">
@@ -114,6 +130,7 @@
             <button class="subtab-button active" data-cal-view="week" data-i18n="calWeekView">週視圖</button>
             <button class="subtab-button" data-cal-view="month" data-i18n="calMonthView">月視圖</button>
           </div>
+
           <div class="calendar-nav">
             <button class="btn btn-ghost" id="btn-prev-period">◀</button>
             <button class="btn btn-ghost" id="btn-today" data-i18n="btnToday">今天</button>
@@ -121,32 +138,26 @@
             <span class="calendar-period-label" id="period-label"></span>
           </div>
         </div>
+
       </div>
 
       <div class="calendar-legend">
-        <span class="legend-item">
-          <span class="legend-dot legend-clearance"></span> <span data-i18n="legendClearance">結關日</span>
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot legend-sailing"></span> <span data-i18n="legendSailing">實際開船時間</span>
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot legend-arrival"></span> <span data-i18n="legendArrival">抵達日</span>
-        </span>
+        <span><span class="legend-dot legend-clearance"></span> <span data-i18n="legendClearance">結關</span></span>
+        <span><span class="legend-dot legend-sailing"></span> <span data-i18n="legendSailing">開船</span></span>
+        <span><span class="legend-dot legend-arrival"></span> <span data-i18n="legendArrival">抵達</span></span>
       </div>
 
-      <div class="calendar-grid" id="calendar-grid">
-        <!-- 由 script.js 注入 -->
-      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
     </section>
+
   </main>
 
-  <!-- 詳細資訊 Modal -->
+  <!-- ===== 詳細 Modal ===== -->
   <div class="modal-backdrop" id="detail-modal-backdrop">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modal-title"></div>
-        <button class="modal-close" id="modal-close-btn">&times;</button>
+        <div id="modal-title"></div>
+        <button class="modal-close" id="modal-close-btn">×</button>
       </div>
       <div class="modal-body">
         <dl id="modal-detail-list"></dl>
@@ -154,15 +165,20 @@
     </div>
   </div>
 
+  <!-- ===== Footer ===== -->
   <footer class="app-footer">
     <span data-i18n="footerSource">資料來源：Google Sheet（唯讀）</span>
     <span class="dot">•</span>
-    <span data-i18n="footerAutoRefresh">頁面將自動每 3 分鐘重新整理資料</span>
+    <span data-i18n="footerAutoRefresh">頁面每 3 分鐘自動更新</span>
   </footer>
 
+  <!-- ===== 設定你的 Google Sheet CSV 連結 ===== -->
   <script>
-    window.SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPCnYDQ7Z68xF_BtbDDM3ttAxlzq-Wa_zGQR_TTs2yPemTQuegsXgWl7kEgv6qJ2ut3ASPQ_Q-KnSq/pub?gid=994272775&single=true&output=csv";
+    window.SHEET_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPCnYDQ7Z68xF_BtbDDM3ttAxlzq-Wa_zGQR_TTs2yPemTQuegsXgWl7kEgv6qJ2ut3ASPQ_Q-KnSq/pub?gid=994272775&single=true&output=csv";
   </script>
-  <script src="script.js" defer></script>
+
+  <!-- 主程式 -->
+  <script src="script.js?v=3" defer></script>
 </body>
 </html>
