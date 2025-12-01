@@ -1,3 +1,145 @@
+// i18n setup
+const i18n = {
+  zh: {
+    appTitle: "船班訂艙與檢疫追蹤系統",
+    appSubtitle: "同步 Google Sheet，讓報關行即時掌握船班與文件狀態",
+    badgeReadonly: "只讀・自動更新",
+    tabTable: "表格視圖",
+    tabCalendar: "行事曆視圖",
+    filterSO: "SO 狀態：",
+    filterTelex: "電放單狀態：",
+    filterAll: "全部",
+    filterSOdone: "已給 SO",
+    filterSOpending: "尚未給 SO",
+    filterTelexDone: "已給 電放單",
+    filterTelexPending: "尚未給 電放單",
+    tableTitle: "船班列表",
+    tableDesc: "點欄位標題可排序，SO / 電放單會自動判斷是否已提供。",
+    hintSource: "資料來源：Google Sheet CSV（唯讀）",
+    colVessel: "船班",
+    colClearanceDate: "結關日",
+    colSailingTime: "實際開船時間",
+    colPort: "抵達港口",
+    colArrivalDate: "抵達日",
+    colQuantity: "訂櫃數量",
+    colSOstatus: "SO 狀態",
+    colQuarantineTime: "申請檢疫官到場時間",
+    colDrugNo: "藥務號",
+    colQuarantineCertNo: "檢疫證號碼",
+    colStuffingDate: "實際裝櫃日",
+    colTelexStatus: "電放單狀態",
+    calTitle: "行事曆",
+    calDesc: "可切換週 / 月視圖，顏色區分結關、開船、抵達時間。",
+    calWeekView: "週視圖",
+    calMonthView: "月視圖",
+    btnToday: "今天",
+    legendClearance: "結關日",
+    legendSailing: "實際開船時間",
+    legendArrival: "抵達日",
+    footerSource: "資料來源：Google Sheet（唯讀）",
+    footerAutoRefresh: "頁面將自動每 3 分鐘重新整理資料",
+    searchPlaceholder: "搜尋船名、船班、港口、藥務號、檢疫證號...",
+    weekPrefix: "週",
+    alldayRowLabel: "整天",
+    sailingRowLabel: "開船",
+    weekdayNames: ["日", "一", "二", "三", "四", "五", "六"],
+    soProvided: "SO（出貨指示書）已提供",
+    soNotProvided: "SO（出貨指示書）尚未提供",
+    telexProvided: "電放（Telex Release）已指示",
+    telexNotProvided: "電放（Telex Release）尚未指示",
+    eventClearanceShort: "結關",
+    eventArrivalShort: "抵達",
+    eventSailingShort: "開船",
+    modalFieldVessel: "船班",
+    modalFieldClearanceDate: "結關日",
+    modalFieldSailingTime: "實際開船時間",
+    modalFieldPort: "抵達港口",
+    modalFieldArrivalDate: "抵達日",
+    modalFieldQuantity: "訂櫃數量",
+    modalFieldSO: "SO",
+    modalFieldQuarantineTime: "申請檢疫官到場時間",
+    modalFieldDrugNo: "藥務號",
+    modalFieldCertNo: "檢疫證號碼",
+    modalFieldStuffingDate: "實際裝櫃日",
+    modalFieldTelex: "電放單",
+    modalSOEmpty: "(尚未給)",
+    modalTelexEmpty: "(尚未給)",
+    periodYearSuffix: "年",
+    periodMonthSuffix: "月",
+    between: " ~ "
+  },
+  ja: {
+    appTitle: "船舶ブッキング・検疫管理システム",
+    appSubtitle: "Googleスプレッドシートと連携し、通関業者が船積み状況と書類状況を即時把握できます。",
+    badgeReadonly: "閲覧専用・自動更新",
+    tabTable: "表形式ビュー",
+    tabCalendar: "カレンダービュー",
+    filterSO: "SO ステータス：",
+    filterTelex: "電放ステータス：",
+    filterAll: "すべて",
+    filterSOdone: "SO 提出済み",
+    filterSOpending: "SO 未提出",
+    filterTelexDone: "電放指示済み",
+    filterTelexPending: "電放指示未提出",
+    tableTitle: "船積み一覧",
+    tableDesc: "ヘッダーをクリックすると並び替えできます。SO / 電放ステータスは自動判定されます。",
+    hintSource: "データソース：Google Sheet CSV（閲覧専用）",
+    colVessel: "船名 / VOY",
+    colClearanceDate: "通関締切日",
+    colSailingTime: "実際出港時刻",
+    colPort: "到着港",
+    colArrivalDate: "到着日",
+    colQuantity: "予約コンテナ数",
+    colSOstatus: "SO ステータス",
+    colQuarantineTime: "検疫官立会申請時刻",
+    colDrugNo: "薬事番号",
+    colQuarantineCertNo: "検疫証明番号",
+    colStuffingDate: "実際バンニング日",
+    colTelexStatus: "電放ステータス",
+    calTitle: "カレンダー",
+    calDesc: "週 / 月ビューを切り替え、通関締切・出港・到着を色分け表示します。",
+    calWeekView: "週ビュー",
+    calMonthView: "月ビュー",
+    btnToday: "今日",
+    legendClearance: "通関締切日",
+    legendSailing: "実際出港時刻",
+    legendArrival: "到着日",
+    footerSource: "データソース：Google Sheet（閲覧専用）",
+    footerAutoRefresh: "画面は3分ごとに自動更新されます",
+    searchPlaceholder: "船名・港・薬事番号・検疫証明番号で検索...",
+    weekPrefix: "週",
+    alldayRowLabel: "終日",
+    sailingRowLabel: "出港",
+    weekdayNames: ["日", "月", "火", "水", "木", "金", "土"],
+    soProvided: "SO（出荷指示書）提出済",
+    soNotProvided: "SO（出荷指示書）未提出",
+    telexProvided: "電放（テレックスリリース）指示済",
+    telexNotProvided: "電放（テレックスリリース）未指示",
+    eventClearanceShort: "通関締切",
+    eventArrivalShort: "到着",
+    eventSailingShort: "出港",
+    modalFieldVessel: "船名 / VOY",
+    modalFieldClearanceDate: "通関締切日",
+    modalFieldSailingTime: "実際出港時刻",
+    modalFieldPort: "到着港",
+    modalFieldArrivalDate: "到着日",
+    modalFieldQuantity: "予約コンテナ数",
+    modalFieldSO: "SO（出荷指示書）",
+    modalFieldQuarantineTime: "検疫官立会申請時刻",
+    modalFieldDrugNo: "薬事番号",
+    modalFieldCertNo: "検疫証明番号",
+    modalFieldStuffingDate: "実際バンニング日",
+    modalFieldTelex: "電放（テレックスリリース）",
+    modalSOEmpty: "（未提出）",
+    modalTelexEmpty: "（未指示）",
+    periodYearSuffix: "年",
+    periodMonthSuffix: "月",
+    between: " 〜 "
+  }
+};
+
+let currentLang = localStorage.getItem("shipmentLang") || "zh";
+
 // 主要資料
 let allShipments = [];
 let filteredShipments = [];
@@ -7,16 +149,58 @@ let currentWeekStart = getWeekStart(new Date());
 let currentMonth = new Date(); // 月視圖用
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupLanguageToggle();
   setupTabs();
   setupFilterAndSearch();
   setupTableSorting();
   setupCalendarControls();
   setupModal();
+  applyTranslations(); // 先套用語系文字
   loadSheetData();
 
   // 每 3 分鐘自動更新
   setInterval(loadSheetData, 180000);
 });
+
+// i18n helpers
+function t(key) {
+  const langPack = i18n[currentLang] || i18n.zh;
+  return langPack[key] ?? i18n.zh[key] ?? key;
+}
+
+function setupLanguageToggle() {
+  const buttons = document.querySelectorAll(".lang-btn");
+  buttons.forEach((btn) => {
+    btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
+    btn.addEventListener("click", () => {
+      const lang = btn.getAttribute("data-lang");
+      if (lang === currentLang) return;
+      currentLang = lang;
+      localStorage.setItem("shipmentLang", currentLang);
+      buttons.forEach((b) =>
+        b.classList.toggle("active", b.getAttribute("data-lang") === currentLang)
+      );
+      applyTranslations();
+      // 重新渲染表格與行事曆中的文字
+      renderTable();
+      renderCalendar();
+    });
+  });
+}
+
+function applyTranslations() {
+  // 一般 data-i18n 的元素
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+
+  // placeholder
+  const searchInput = document.getElementById("search-input");
+  if (searchInput) {
+    searchInput.placeholder = t("searchPlaceholder");
+  }
+}
 
 // 讀取 Google Sheet CSV
 async function loadSheetData() {
@@ -160,7 +344,10 @@ function renderTable() {
     const soCell = document.createElement("td");
     const hasSO = !!item.so.trim();
     soCell.appendChild(
-      createStatusChip(hasSO ? "已給 SO 訂艙單" : "尚未給 SO 訂艙單", hasSO)
+      createStatusChip(
+        t(hasSO ? "soProvided" : "soNotProvided"),
+        hasSO
+      )
     );
     tr.appendChild(soCell);
 
@@ -173,7 +360,7 @@ function renderTable() {
     const hasTelex = !!item.telexRelease.trim();
     telexCell.appendChild(
       createStatusChip(
-        hasTelex ? "已給電放單" : "尚未給電放單",
+        t(hasTelex ? "telexProvided" : "telexNotProvided"),
         hasTelex
       )
     );
@@ -320,7 +507,7 @@ function renderWeekView(grid) {
 
   const periodLabel = document.getElementById("period-label");
   periodLabel.textContent =
-    formatDate(currentWeekStart) + " ~ " + formatDate(days[6]);
+    formatDate(currentWeekStart) + t("between") + formatDate(days[6]);
 
   const headerRow = document.createElement("div");
   headerRow.className = "calendar-row calendar-header-row";
@@ -330,14 +517,14 @@ function renderWeekView(grid) {
   labelCell.textContent = "";
   headerRow.appendChild(labelCell);
 
-  const weekDayNames = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekdayNames = i18n[currentLang].weekdayNames || i18n.zh.weekdayNames;
 
   days.forEach((d) => {
     const cell = document.createElement("div");
     cell.className = "calendar-cell";
     const spanName = document.createElement("span");
     spanName.className = "day-name";
-    spanName.textContent = "週" + weekDayNames[d.getDay()];
+    spanName.textContent = t("weekPrefix") + weekdayNames[d.getDay()];
     const spanDate = document.createElement("span");
     spanDate.className = "day-date";
     spanDate.textContent =
@@ -354,7 +541,7 @@ function renderWeekView(grid) {
   allDayRow.className = "calendar-row";
   const allDayLabel = document.createElement("div");
   allDayLabel.className = "calendar-label";
-  allDayLabel.textContent = "整天";
+  allDayLabel.textContent = t("alldayRowLabel");
   allDayRow.appendChild(allDayLabel);
 
   days.forEach((day) => {
@@ -366,11 +553,11 @@ function renderWeekView(grid) {
       const arrivalDate = parseDate(item.arrivalDate);
 
       if (isSameDay(clearanceDate, day)) {
-        const pill = createEventPill(item, "結關", "event-clearance");
+        const pill = createEventPill(item, t("eventClearanceShort"), "event-clearance");
         cell.appendChild(pill);
       }
       if (isSameDay(arrivalDate, day)) {
-        const pill = createEventPill(item, "抵達", "event-arrival");
+        const pill = createEventPill(item, t("eventArrivalShort"), "event-arrival");
         cell.appendChild(pill);
       }
     });
@@ -385,7 +572,7 @@ function renderWeekView(grid) {
   sailRow.className = "calendar-row";
   const sailLabel = document.createElement("div");
   sailLabel.className = "calendar-label";
-  sailLabel.textContent = "開船";
+  sailLabel.textContent = t("sailingRowLabel");
   sailRow.appendChild(sailLabel);
 
   days.forEach((day) => {
@@ -401,7 +588,7 @@ function renderWeekView(grid) {
           pad2(sailingDateTime.getMinutes());
         const pill = createEventPill(
           item,
-          `開船 ${timeStr}`,
+          `${t("eventSailingShort")} ${timeStr}`,
           "event-sailing"
         );
         cell.appendChild(pill);
@@ -422,9 +609,9 @@ function renderMonthView(grid) {
   const startDate = getCalendarMonthStart(firstDayOfMonth);
 
   const periodLabel = document.getElementById("period-label");
-  periodLabel.textContent = `${year} 年 ${month + 1} 月`;
+  periodLabel.textContent = `${year}${t("periodYearSuffix")} ${month + 1}${t("periodMonthSuffix")}`;
 
-  const weekDayNames = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekdayNames = i18n[currentLang].weekdayNames || i18n.zh.weekdayNames;
   const headerRow = document.createElement("div");
   headerRow.className = "calendar-row calendar-header-row";
 
@@ -438,7 +625,7 @@ function renderMonthView(grid) {
     cell.className = "calendar-cell";
     const spanName = document.createElement("span");
     spanName.className = "day-name";
-    spanName.textContent = "週" + weekDayNames[i];
+    spanName.textContent = t("weekPrefix") + weekdayNames[i];
     cell.appendChild(spanName);
     headerRow.appendChild(cell);
   }
@@ -477,12 +664,12 @@ function renderMonthView(grid) {
 
       if (isSameDay(clearanceDate, cellDate)) {
         eventsContainer.appendChild(
-          createEventPill(item, "結關", "event-clearance")
+          createEventPill(item, t("eventClearanceShort"), "event-clearance")
         );
       }
       if (isSameDay(arrivalDate, cellDate)) {
         eventsContainer.appendChild(
-          createEventPill(item, "抵達", "event-arrival")
+          createEventPill(item, t("eventArrivalShort"), "event-arrival")
         );
       }
       if (sailingDateTime && isSameDay(sailingDateTime, cellDate)) {
@@ -491,7 +678,7 @@ function renderMonthView(grid) {
           ":" +
           pad2(sailingDateTime.getMinutes());
         eventsContainer.appendChild(
-          createEventPill(item, `開船 ${timeStr}`, "event-sailing")
+          createEventPill(item, `${t("eventSailingShort")} ${timeStr}`, "event-sailing")
         );
       }
     });
@@ -538,18 +725,18 @@ function openDetailModal(item, eventLabel) {
   listEl.innerHTML = "";
 
   const fields = [
-    ["船班", item.vessel],
-    ["結關日", item.clearanceDate],
-    ["實際開船時間", item.sailingTime],
-    ["抵達港口", item.port],
-    ["抵達日", item.arrivalDate],
-    ["訂櫃數量", item.quantity],
-    ["SO", item.so || "(尚未給)"],
-    ["申請檢疫官到場時間", item.quarantineTime],
-    ["藥務號", item.drugNo],
-    ["檢疫證號碼", item.quarantineCertNo],
-    ["實際裝櫃日", item.stuffingDate],
-    ["電放單", item.telexRelease || "(尚未給)"]
+    [t("modalFieldVessel"), item.vessel],
+    [t("modalFieldClearanceDate"), item.clearanceDate],
+    [t("modalFieldSailingTime"), item.sailingTime],
+    [t("modalFieldPort"), item.port],
+    [t("modalFieldArrivalDate"), item.arrivalDate],
+    [t("modalFieldQuantity"), item.quantity],
+    [t("modalFieldSO"), item.so || t("modalSOEmpty")],
+    [t("modalFieldQuarantineTime"), item.quarantineTime],
+    [t("modalFieldDrugNo"), item.drugNo],
+    [t("modalFieldCertNo"), item.quarantineCertNo],
+    [t("modalFieldStuffingDate"), item.stuffingDate],
+    [t("modalFieldTelex"), item.telexRelease || t("modalTelexEmpty")]
   ];
 
   fields.forEach(([label, value]) => {
