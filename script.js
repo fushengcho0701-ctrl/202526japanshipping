@@ -185,12 +185,13 @@ function parseCSV(text) {
       port: cols[3] || "",
       arrivalDate: cols[4] || "",
       quantity: cols[5] || "",
-
+      // SO 欄位 1 = 已給，其餘 / 空白 = 尚未給
       soStatus: cols[6] === "1" ? "done" : "pending",
       quarantineTime: cols[7] || "",
       drugNo: cols[8] || "",
       quarantineCertNo: cols[9] || "",
       stuffingDate: cols[10] || "",
+      // 電放單欄位 1 = 已給，其餘 / 空白 = 尚未給
       telexStatus: cols[11] === "1" ? "done" : "pending"
     });
   }
@@ -250,6 +251,8 @@ function applyFiltersAndRender() {
 ----------------------------------------------------- */
 function renderTable() {
   const tbody = document.getElementById("table-body");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   filteredData.forEach((row) => {
@@ -320,10 +323,11 @@ function setupSorting() {
 }
 
 /* -----------------------------------------------------
-   Simple Calendar（週 + 月）
+   Calendar（週 + 月）
 ----------------------------------------------------- */
 function renderCalendar() {
   const grid = document.getElementById("calendar-grid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   if (calendarView === "week") renderWeekView();
@@ -332,14 +336,16 @@ function renderCalendar() {
 
 function renderWeekView() {
   const grid = document.getElementById("calendar-grid");
-
   const start = startOfWeek(currentDate);
   const days = [...Array(7)].map((_, i) => addDays(start, i));
 
   const header = document.createElement("div");
   header.className = "calendar-week";
   header.innerHTML = days
-    .map((d) => `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`)
+    .map(
+      (d) =>
+        `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`
+    )
     .join("");
   grid.appendChild(header);
 
@@ -353,11 +359,17 @@ function renderWeekView() {
 
     filteredData.forEach((item) => {
       if (item.clearanceDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-clearance">${t("legendClearance")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-clearance">${t(
+          "legendClearance"
+        )}</span>`;
       if (item.sailingTime === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-sailing">${t("legendSailing")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-sailing">${t(
+          "legendSailing"
+        )}</span>`;
       if (item.arrivalDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-arrival">${t("legendArrival")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-arrival">${t(
+          "legendArrival"
+        )}</span>`;
     });
 
     row.appendChild(cell);
@@ -365,8 +377,10 @@ function renderWeekView() {
 
   grid.appendChild(row);
 
-  document.getElementById("period-label").textContent =
-    `${formatDate(days[0])} - ${formatDate(days[6])}`;
+  const label = document.getElementById("period-label");
+  if (label) {
+    label.textContent = `${formatDate(days[0])} - ${formatDate(days[6])}`;
+  }
 }
 
 function renderMonthView() {
@@ -390,11 +404,17 @@ function renderMonthView() {
 
     filteredData.forEach((item) => {
       if (item.clearanceDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-clearance">${t("legendClearance")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-clearance">${t(
+          "legendClearance"
+        )}</span>`;
       if (item.sailingTime === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-sailing">${t("legendSailing")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-sailing">${t(
+          "legendSailing"
+        )}</span>`;
       if (item.arrivalDate === formatDate(date))
-        cell.innerHTML += `<span class="calendar-event event-arrival">${t("legendArrival")}</span>`;
+        cell.innerHTML += `<span class="calendar-event event-arrival">${t(
+          "legendArrival"
+        )}</span>`;
     });
 
     box.appendChild(cell);
@@ -402,7 +422,10 @@ function renderMonthView() {
 
   grid.appendChild(box);
 
-  document.getElementById("period-label").textContent = `${y}/${m + 1}`;
+  const label = document.getElementById("period-label");
+  if (label) {
+    label.textContent = `${y}/${m + 1}`;
+  }
 }
 
 /* -----------------------------------------------------
@@ -427,41 +450,107 @@ function formatDate(d) {
 }
 
 /* -----------------------------------------------------
-   Initialize System
+   Initialize System（所有 DOM 綁定都放這裡＋防呆）
 ----------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
+  // 語言 & 翻譯
   setupLanguageToggle();
   applyTranslations();
+
+  // 排序、載入資料
   setupSorting();
   loadSheetData();
 
-  document.getElementById("search-input").addEventListener("input", applyFiltersAndRender);
-  document.getElementById("filter-so").addEventListener("change", applyFiltersAndRender);
-  document.getElementById("filter-telex").addEventListener("change", applyFiltersAndRender);
+  // 搜尋框
+  const searchInput = document.getElementById("search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", applyFiltersAndRender);
+  }
 
-  /* -----------------------------------------------------
-     修復：行事曆按鈕要在 DOM 載入後才能綁定
-  ----------------------------------------------------- */
-  document.getElementById("btn-prev-period").addEventListener("click", () => {
-    currentDate =
-      calendarView === "week"
-        ? addDays(currentDate, -7)
-        : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    renderCalendar();
-  });
+  // SO 篩選
+  const filterSO = document.getElementById("filter-so");
+  if (filterSO) {
+    filterSO.addEventListener("change", applyFiltersAndRender);
+  }
 
-  document.getElementById("btn-next-period").addEventListener("click", () => {
-    currentDate =
-      calendarView === "week"
-        ? addDays(currentDate, 7)
-        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    renderCalendar();
-  });
+  // 電放單篩選
+  const filterTelex = document.getElementById("filter-telex");
+  if (filterTelex) {
+    filterTelex.addEventListener("change", applyFiltersAndRender);
+  }
 
-  document.getElementById("btn-today").addEventListener("click", () => {
-    currentDate = new Date();
-    renderCalendar();
-  });
+  // 視圖切換（表格 / 行事曆）
+  const views = document.querySelectorAll(".view");
+  const tabButtons = document.querySelectorAll(".tab-button");
+  if (tabButtons.length && views.length) {
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        if (!targetId) return;
 
-  setInterval(loadSheetData, 180000); // auto refresh every 3 min
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        views.forEach((v) => v.classList.remove("active"));
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.classList.add("active");
+
+        if (targetId === "calendar-view") {
+          renderCalendar();
+        }
+      });
+    });
+  }
+
+  // 行事曆子視圖切換（週 / 月）
+  const subtabButtons = document.querySelectorAll(".subtab-button");
+  if (subtabButtons.length) {
+    subtabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const view = btn.dataset.calView;
+        if (!view) return;
+
+        calendarView = view; // "week" or "month"
+
+        subtabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        renderCalendar();
+      });
+    });
+  }
+
+  // 行事曆上一段 / 下一段 / 今天
+  const btnPrev = document.getElementById("btn-prev-period");
+  if (btnPrev) {
+    btnPrev.addEventListener("click", () => {
+      currentDate =
+        calendarView === "week"
+          ? addDays(currentDate, -7)
+          : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      renderCalendar();
+    });
+  }
+
+  const btnNext = document.getElementById("btn-next-period");
+  if (btnNext) {
+    btnNext.addEventListener("click", () => {
+      currentDate =
+        calendarView === "week"
+          ? addDays(currentDate, 7)
+          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      renderCalendar();
+    });
+  }
+
+  const btnToday = document.getElementById("btn-today");
+  if (btnToday) {
+    btnToday.addEventListener("click", () => {
+      currentDate = new Date();
+      renderCalendar();
+    });
+  }
+
+  // 每 3 分鐘重新抓 Google Sheet 資料
+  setInterval(loadSheetData, 180000);
 });
