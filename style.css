@@ -21,9 +21,9 @@
   --radius-card: 18px;
   --radius-pill: 999px;
 
-  --event-clearance: #0a84ff; /* 藍 */
-  --event-sailing: #ff9f0a; /* 橘 */
-  --event-arrival: #34c759; /* 綠 */
+  --event-clearance: #0a84ff;
+  --event-sailing: #ff9f0a;
+  --event-arrival: #34c759;
 }
 
 *,
@@ -41,10 +41,7 @@ body {
   color: var(--text-main);
 }
 
-/* ------------------------------
-   Header Area
------------------------------- */
-
+/* Header */
 .app-header {
   position: sticky;
   top: 0;
@@ -104,10 +101,7 @@ body {
   color: #0856a6;
 }
 
-/* ------------------------------
-   Language Toggle (Segmented)
------------------------------- */
-
+/* Language toggle */
 .lang-toggle {
   background: rgba(250, 250, 252, 0.9);
   border-radius: var(--radius-pill);
@@ -133,20 +127,14 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* ------------------------------
-   Layout / Main Container
------------------------------- */
-
+/* Layout */
 .app-main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 16px;
 }
 
-/* ------------------------------
-   Cards
------------------------------- */
-
+/* Card */
 .card {
   background: rgba(255, 255, 255, 0.96);
   border-radius: var(--radius-card);
@@ -189,10 +177,8 @@ body {
   border-radius: 50%;
   background: #30d158;
 }
-/* ------------------------------
-   Controls Section
------------------------------- */
 
+/* Controls */
 .card-controls {
   display: flex;
   justify-content: space-between;
@@ -215,8 +201,7 @@ body {
   justify-content: flex-end;
 }
 
-/* Search Bar */
-
+/* Search */
 .search-group {
   position: relative;
   min-width: 260px;
@@ -245,8 +230,7 @@ body {
   font-size: 0.85rem;
 }
 
-/* Filter Group */
-
+/* Filters */
 .filter-group {
   display: flex;
   gap: 8px;
@@ -264,10 +248,7 @@ body {
   font-size: 0.8rem;
 }
 
-/* ------------------------------
-   Tabs
------------------------------- */
-
+/* Tabs */
 .tabs {
   display: inline-flex;
   padding: 3px;
@@ -293,10 +274,7 @@ body {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 }
 
-/* ------------------------------
-   Views
------------------------------- */
-
+/* Views */
 .view {
   display: none;
 }
@@ -305,10 +283,7 @@ body {
   display: block;
 }
 
-/* ------------------------------
-   Table Design
------------------------------- */
-
+/* Table */
 .table-wrapper {
   width: 100%;
   overflow: auto;
@@ -361,8 +336,7 @@ tr:hover td {
   background: #fafafa;
 }
 
-/* Status Chips */
-
+/* Status chips */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -390,10 +364,14 @@ tr:hover td {
   color: var(--danger-text);
 }
 
-/* ------------------------------
-   Buttons
------------------------------- */
+/* Multi-container warning under vessel */
+.table-note {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--danger-text);
+}
 
+/* Buttons */
 .btn {
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
@@ -413,10 +391,8 @@ tr:hover td {
 .btn:hover {
   background: #e5e5ea;
 }
-/* ------------------------------
-   Calendar Section
------------------------------- */
 
+/* Calendar */
 .calendar-header {
   flex-wrap: wrap;
 }
@@ -465,18 +441,11 @@ tr:hover td {
 }
 
 /* Legend */
-
 .calendar-legend {
   display: flex;
   gap: 16px;
   margin: 10px 0;
   font-size: 0.8rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .legend-dot {
@@ -497,8 +466,7 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
-/* Calendar Grid */
-
+/* Calendar grid */
 .calendar-grid {
   margin-top: 12px;
   border-radius: 14px;
@@ -507,8 +475,7 @@ tr:hover td {
   background: #ffffff;
 }
 
-/* Week View */
-
+/* Week view */
 .calendar-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -528,8 +495,7 @@ tr:hover td {
   border-right: none;
 }
 
-/* Week Cells */
-
+/* Week cells */
 .calendar-week-cell {
   min-height: 90px;
   border-right: 1px solid var(--border-subtle);
@@ -548,8 +514,7 @@ tr:hover td {
   margin-bottom: 4px;
 }
 
-/* Month View */
-
+/* Month view */
 .calendar-month {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -572,8 +537,7 @@ tr:hover td {
   margin-bottom: 4px;
 }
 
-/* Calendar Event Chips */
-
+/* Calendar event chips */
 .calendar-event {
   display: block;
   font-size: 0.7rem;
@@ -601,10 +565,7 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
-/* ------------------------------
-   Modal
------------------------------- */
-
+/* Modal */
 .modal-backdrop {
   display: none;
   position: fixed;
@@ -681,10 +642,7 @@ tr:hover td {
   font-weight: 600;
 }
 
-/* ------------------------------
-   Footer
------------------------------- */
-
+/* Footer */
 .app-footer {
   text-align: center;
   padding: 20px 0 30px;
@@ -696,20 +654,15 @@ tr:hover td {
   margin: 0 6px;
 }
 
-/* ------------------------------
-   Responsive Adjustments
------------------------------- */
-
+/* Responsive */
 @media (max-width: 880px) {
   .card-controls {
     flex-direction: column;
     align-items: stretch;
   }
-
   .controls-right {
     justify-content: space-between;
   }
-
   .table-wrapper {
     overflow-x: auto;
   }
@@ -721,12 +674,10 @@ tr:hover td {
     gap: 10px;
     padding: 10px 16px;
   }
-
   .controls-right {
     flex-direction: column;
     align-items: stretch;
   }
-
   .search-group {
     width: 100%;
   }
