@@ -1,10 +1,5 @@
-/* ============================================================
-   Apple-style UI — v107 FINAL
-   船班追蹤系統主題樣式
-=========================================================== */
-
 /* ------------------------------
-   Base Variables
+   Base Apple Style Variables
 ------------------------------ */
 :root {
   --bg: #f5f5f7;
@@ -14,6 +9,8 @@
   --text-main: #1d1d1f;
   --text-muted: #6e6e73;
   --accent: #0a84ff;
+  --accent-soft: #e5f2ff;
+  --accent-strong: #0060df;
 
   --success-bg: #daf6dd;
   --success-text: #058b35;
@@ -29,9 +26,6 @@
   --event-arrival: #34c759;
 }
 
-/* ------------------------------
-   Global
------------------------------- */
 *,
 *::before,
 *::after {
@@ -41,15 +35,13 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", system-ui, "Noto Sans TC", "PingFang TC",
-    "Microsoft JhengHei", sans-serif;
+    "Segoe UI", system-ui, -apple-system, "Noto Sans TC",
+    "PingFang TC", "Microsoft JhengHei", sans-serif;
   background: radial-gradient(circle at top, #ffffff 0%, #f5f5f7 46%, #ebedf0 100%);
   color: var(--text-main);
 }
 
-/* ------------------------------
-   Header
------------------------------- */
+/* Header */
 .app-header {
   position: sticky;
   top: 0;
@@ -91,6 +83,12 @@ body {
   color: var(--text-muted);
 }
 
+.app-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .badge {
   padding: 4px 10px;
   border-radius: var(--radius-pill);
@@ -129,18 +127,14 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* ------------------------------
-   Layout
------------------------------- */
+/* Layout */
 .app-main {
   max-width: 1200px;
   margin: 0 auto;
   padding: 16px;
 }
 
-/* ------------------------------
-   Cards
------------------------------- */
+/* Card */
 .card {
   background: rgba(255, 255, 255, 0.96);
   border-radius: var(--radius-card);
@@ -184,9 +178,7 @@ body {
   background: #30d158;
 }
 
-/* ------------------------------
-   Controls
------------------------------- */
+/* Controls */
 .card-controls {
   display: flex;
   justify-content: space-between;
@@ -195,31 +187,21 @@ body {
   margin-bottom: 18px;
 }
 
-.tabs {
-  display: inline-flex;
-  padding: 3px;
-  background: rgba(250, 250, 252, 0.9);
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(210, 210, 215, 0.9);
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.tab-button {
-  border: none;
-  background: transparent;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: var(--text-muted);
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
-.tab-button.active {
-  background: #ffffff;
-  color: var(--text-main);
-  font-weight: 600;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-}
-
+/* Search */
 .search-group {
   position: relative;
   min-width: 260px;
@@ -248,16 +230,60 @@ body {
   font-size: 0.85rem;
 }
 
+/* Filters */
 .filter-group {
   display: flex;
   gap: 8px;
-  font-size: 0.8rem;
   flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
-/* ------------------------------
-   Table
------------------------------- */
+.filter-group select {
+  margin-left: 3px;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+}
+
+/* Tabs */
+.tabs {
+  display: inline-flex;
+  padding: 3px;
+  background: rgba(250, 250, 252, 0.9);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(210, 210, 215, 0.9);
+}
+
+.tab-button {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.tab-button.active {
+  background: #ffffff;
+  color: var(--text-main);
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Views */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+/* Table */
 .table-wrapper {
   width: 100%;
   overflow: auto;
@@ -291,6 +317,13 @@ th {
   cursor: pointer;
 }
 
+th::after {
+  content: "";
+  margin-left: 4px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
 th[data-sort-active="asc"]::after {
   content: "▲";
 }
@@ -303,6 +336,7 @@ tr:hover td {
   background: #fafafa;
 }
 
+/* Status chips */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -311,6 +345,13 @@ tr:hover td {
   border-radius: var(--radius-pill);
   font-size: 0.7rem;
   font-weight: 600;
+}
+
+.chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .chip-ok {
@@ -323,15 +364,35 @@ tr:hover td {
   color: var(--danger-text);
 }
 
-.table-note {
+/* Multi-container warning under vessel */
+.vessel-note {
   margin-top: 4px;
   font-size: 0.75rem;
-  color: var(--danger-text);
+  color: #b00020;
 }
 
-/* ------------------------------
-   Calendar
------------------------------- */
+/* Buttons */
+.btn {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: #f5f5f7;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.btn:hover {
+  background: #e5e5ea;
+}
+
+/* Calendar */
 .calendar-header {
   flex-wrap: wrap;
 }
@@ -370,8 +431,8 @@ tr:hover td {
 
 .calendar-nav {
   display: flex;
-  gap: 6px;
   align-items: center;
+  gap: 6px;
 }
 
 .calendar-period-label {
@@ -379,6 +440,7 @@ tr:hover td {
   font-weight: 600;
 }
 
+/* Legend */
 .calendar-legend {
   display: flex;
   gap: 16px;
@@ -404,6 +466,7 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
+/* Calendar grid */
 .calendar-grid {
   margin-top: 12px;
   border-radius: 14px;
@@ -412,48 +475,86 @@ tr:hover td {
   background: #ffffff;
 }
 
-.calendar-week,
-.calendar-month {
+/* Week view */
+.calendar-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .calendar-weekday {
   padding: 6px;
   background: #f9fafc;
   border-right: 1px solid var(--border-subtle);
+  text-align: center;
   font-weight: 600;
   font-size: 0.85rem;
-  text-align: center;
 }
 
-.calendar-week-cell,
-.calendar-month-cell {
-  min-height: 100px;
-  padding: 4px;
-  font-size: 0.75rem;
+.calendar-weekday:last-child {
+  border-right: none;
+}
+
+/* Week cells */
+.calendar-week-cell {
+  min-height: 90px;
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
+  padding: 4px;
+  font-size: 0.75rem;
+  position: relative;
 }
 
-.day-number {
+.calendar-week-cell:last-child {
+  border-right: none;
+}
+
+.calendar-week-cell .day-number {
   font-weight: bold;
   margin-bottom: 4px;
 }
 
+/* Month view */
+.calendar-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-month-cell {
+  min-height: 100px;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px;
+  font-size: 0.75rem;
+}
+
+.calendar-month-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-month-cell .day-number {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* Calendar event chips */
 .calendar-event {
   display: block;
   font-size: 0.7rem;
   padding: 2px 6px;
   margin-bottom: 2px;
   border-radius: var(--radius-pill);
-  color: #fff;
-  opacity: 0.92;
+  color: #ffffff;
   cursor: pointer;
+  opacity: 0.92;
 }
 
 .calendar-event:hover {
   opacity: 1;
+}
+
+.event-clearance {
+  background: var(--event-clearance);
 }
 
 .event-sailing {
@@ -464,13 +565,21 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
-.event-clearance {
-  background: var(--event-clearance);
+/* +N more button in calendar */
+.calendar-more-btn {
+  margin-top: 2px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: #007aff;
+}
+.calendar-more-btn:hover {
+  text-decoration: underline;
 }
 
-/* ------------------------------
-   Modal
------------------------------- */
+/* Modal */
 .modal-backdrop {
   display: none;
   position: fixed;
@@ -530,21 +639,23 @@ tr:hover td {
   padding: 16px 18px;
 }
 
+.modal-body dl {
+  margin: 0;
+}
+
 .modal-body dt {
-  margin-top: 8px;
   font-size: 0.78rem;
   color: var(--text-muted);
+  margin-top: 8px;
 }
 
 .modal-body dd {
-  margin: 0 0 4px;
+  margin: 0 0 4px 0;
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-/* ------------------------------
-   Footer
------------------------------- */
+/* Footer */
 .app-footer {
   text-align: center;
   padding: 20px 0 30px;
@@ -556,9 +667,7 @@ tr:hover td {
   margin: 0 6px;
 }
 
-/* ------------------------------
-   Responsive
------------------------------- */
+/* Responsive */
 @media (max-width: 880px) {
   .card-controls {
     flex-direction: column;
@@ -566,6 +675,9 @@ tr:hover td {
   }
   .controls-right {
     justify-content: space-between;
+  }
+  .table-wrapper {
+    overflow-x: auto;
   }
 }
 
