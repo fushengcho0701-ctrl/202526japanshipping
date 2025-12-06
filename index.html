@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>船班訂艙與檢疫追蹤系統</title>
   <meta name="theme-color" content="#f5f5f7" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -92,7 +93,7 @@
               <th data-sort-key="containerNo" data-i18n="colContainerNo">櫃次</th>
               <th data-sort-key="clearanceDate" data-i18n="colClearanceDate">結關日</th>
               <th data-sort-key="sailingDate" data-i18n="colSailingTime">實際開船時間</th>
-              <th data-sort-key="loadingTime" data-i18n="colLoadingTime">裝櫃時間</th>
+              <th data-sort-key="loadingDate" data-i18n="colLoadingTime">裝櫃時間</th>
               <th data-sort-key="port" data-i18n="colPort">抵達港口</th>
               <th data-sort-key="arrivalDate" data-i18n="colArrivalDate">抵達日</th>
               <th data-sort-key="soStatus" data-i18n="colSOstatus">SO 狀態</th>
@@ -119,12 +120,6 @@
             <button class="subtab-button active" data-cal-view="week" data-i18n="calWeekView">週視圖</button>
             <button class="subtab-button" data-cal-view="month" data-i18n="calMonthView">月視圖</button>
           </div>
-
-          <div class="calendar-tabs" style="margin-top:6px;">
-            <button id="event-mode-both" class="subtab-button active">開船 + 抵達</button>
-            <button id="event-mode-sailing" class="subtab-button">只顯示開船</button>
-          </div>
-
           <div class="calendar-nav">
             <button class="btn btn-ghost" id="btn-prev-period">◀</button>
             <button class="btn btn-ghost" id="btn-today" data-i18n="btnToday">今天</button>
@@ -170,6 +165,6 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPCnYDQ7Z68xF_BtbDDM3ttAxlzq-Wa_zGQR_TTs2yPemTQuegsXgWl7kEgv6qJ2ut3ASPQ_Q-KnSq/pub?gid=994272775&single=true&output=csv";
   </script>
 
-  <script src="script.js?v=107" defer></script>
+  <script src="script.js?v=200" defer></script>
 </body>
 </html>

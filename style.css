@@ -365,10 +365,10 @@ tr:hover td {
 }
 
 /* Multi-container warning under vessel */
-.vessel-note {
+.table-note {
   margin-top: 4px;
   font-size: 0.75rem;
-  color: #b00020;
+  color: var(--danger-text);
 }
 
 /* Buttons */
@@ -565,20 +565,6 @@ tr:hover td {
   background: var(--event-arrival);
 }
 
-/* +N more button in calendar */
-.calendar-more-btn {
-  margin-top: 2px;
-  padding: 0 6px;
-  border: none;
-  background: transparent;
-  font-size: 0.7rem;
-  cursor: pointer;
-  color: #007aff;
-}
-.calendar-more-btn:hover {
-  text-decoration: underline;
-}
-
 /* Modal */
 .modal-backdrop {
   display: none;
@@ -612,6 +598,7 @@ tr:hover td {
   }
   to {
     opacity: 1;
+    transform: scale(1);
   }
 }
 
