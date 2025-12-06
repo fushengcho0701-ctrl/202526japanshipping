@@ -1,19 +1,18 @@
 /* ============================================================
-   v107 FIXED — 船班追蹤系統
-   修正：setupLanguageToggle、事件切換、行事曆、排序、i18n
-============================================================ */
+   v107 FINAL — 船班追蹤系統 SCRIPT
+  （修正：語言切換、事件切換、行事曆顯示、排序、i18n）
+=========================================================== */
 
 /* ==============================
    Global Variables
 ============================== */
 let rawData = [];
 let filteredData = [];
-let currentSortKey = "arrivalDate";
-let currentSortOrder = "asc";
 let currentLang = localStorage.getItem("lang") || "zh";
 
-let calendarView = "week"; 
+let calendarView = "week"; // week | month
 let currentDate = new Date();
+
 let calendarEventMode = "both"; // both | sailing
 
 /* ==============================
@@ -23,10 +22,11 @@ const i18n = {
   zh: {
     appTitle: "船班訂艙與檢疫追蹤系統",
     appSubtitle: "同步 Google Sheet，讓報關行即時掌握船班與文件狀態",
-    badgeReadonly: "只讀・自動更新",
 
     tabTable: "表格視圖",
     tabCalendar: "行事曆視圖",
+
+    badgeReadonly: "只讀・自動更新",
 
     filterSO: "SO 狀態：",
     filterTelex: "電放單狀態：",
@@ -37,7 +37,7 @@ const i18n = {
     filterTelexPending: "尚未給 電放單",
 
     tableTitle: "船班列表",
-    tableDesc: "點欄位標題可排序，SO / 電放單會自動判斷。",
+    tableDesc: "點欄位標題可排序。",
     hintSource: "資料來源：Google Sheet CSV（唯讀）",
 
     colVessel: "船班",
@@ -63,13 +63,13 @@ const i18n = {
     legendSailing: "開船",
     legendArrival: "抵達",
 
+    emptyValue: "—",
+
     footerSource: "資料來源：Google Sheet（唯讀）",
     footerAutoRefresh: "頁面每 3 分鐘自動更新",
 
-    emptyValue: "—",
-
     eventModeBoth: "開船＋抵達",
-    eventModeSailing: "只顯示開船"
+    eventModeSailing: "只顯示開船",
   }
 };
 
@@ -81,7 +81,7 @@ function t(key) {
 }
 
 function applyTranslations() {
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
     el.textContent = t(el.dataset.i18n);
   });
 }
@@ -91,9 +91,12 @@ function applyTranslations() {
 ============================== */
 function setupLanguageToggle() {
   const btns = document.querySelectorAll(".lang-btn");
-  btns.forEach((btn) => {
+
+  btns.forEach(btn => {
+    if (btn.dataset.lang === currentLang) btn.classList.add("active");
+
     btn.addEventListener("click", () => {
-      btns.forEach((b) => b.classList.remove("active"));
+      btns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
       currentLang = btn.dataset.lang;
@@ -109,14 +112,19 @@ function setupLanguageToggle() {
 /* ==============================
    CSV Parsing
 ============================== */
+function normalizeDate(s) {
+  if (!s) return "";
+  return s.replace("年", "/").replace("月", "/").replace("日", "").trim();
+}
+
 function parseCSV(text) {
   const lines = text.trim().split("\n");
-  const data = [];
+  const rows = [];
 
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(",");
 
-    data.push({
+    rows.push({
       vessel: cols[0] || "",
       containerNo: cols[1] || "",
       clearanceDate: normalizeDate(cols[2]),
@@ -132,15 +140,7 @@ function parseCSV(text) {
     });
   }
 
-  return data;
-}
-
-/* ==============================
-   Normalize date YYYY/MM/DD hh:mm
-============================== */
-function normalizeDate(raw) {
-  if (!raw) return "";
-  return raw.replace(/年|月/g, "/").replace("日", "").trim();
+  return rows;
 }
 
 /* ==============================
@@ -163,13 +163,12 @@ async function loadSheetData() {
    Filter + Search
 ============================== */
 function applyFiltersAndRender() {
-  const kw = (document.getElementById("search-input")?.value || "")
-    .toLowerCase();
+  const kw = (document.getElementById("search-input")?.value || "").toLowerCase();
 
-  const soFilter = document.getElementById("filter-so")?.value || "all";
-  const telexFilter = document.getElementById("filter-telex")?.value || "all";
+  const soFilter = document.getElementById("filter-so").value;
+  const telexFilter = document.getElementById("filter-telex").value;
 
-  filteredData = rawData.filter((row) => {
+  filteredData = rawData.filter(row => {
     const matchKw =
       row.vessel.toLowerCase().includes(kw) ||
       row.port.toLowerCase().includes(kw) ||
@@ -177,21 +176,20 @@ function applyFiltersAndRender() {
       row.quarantineCertNo.toLowerCase().includes(kw);
 
     const matchSO =
-      soFilter === "all" ? true :
-      soFilter === "done" ? row.soStatus === "done" :
-      row.soStatus === "pending";
+      soFilter === "all" ||
+      (soFilter === "done" && row.soStatus === "done") ||
+      (soFilter === "pending" && row.soStatus === "pending");
 
     const matchTelex =
-      telexFilter === "all" ? true :
-      telexFilter === "done" ? row.telexStatus === "done" :
-      row.telexStatus === "pending";
+      telexFilter === "all" ||
+      (telexFilter === "done" && row.telexStatus === "done") ||
+      (telexFilter === "pending" && row.telexStatus === "pending");
 
     return matchKw && matchSO && matchTelex;
   });
 
-  filteredData.sort((a, b) => {
-    return new Date(a.arrivalDate) - new Date(b.arrivalDate);
-  });
+  /** 預設依照抵達日排序 */
+  filteredData.sort((a, b) => new Date(a.arrivalDate) - new Date(b.arrivalDate));
 
   renderTable();
 }
@@ -203,75 +201,78 @@ function renderTable() {
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
 
-  filteredData.forEach((row) => {
+  filteredData.forEach(row => {
     const tr = document.createElement("tr");
 
-    const multiNote =
-      filteredData.filter((x) => x.vessel === row.vessel).length > 1
-        ? `<div class="table-note">⚠ 此船需要 ${Math.max(
-            ...filteredData
-              .filter((x) => x.vessel === row.vessel)
-              .map((x) => Number(x.containerNo) || 1)
-          )} 櫃</div>`
-        : "";
+    /** 如果該船班有多櫃，顯示提醒 */
+    const sameVessel = rawData.filter(x => x.vessel === row.vessel);
+    const need = sameVessel.length > 1 ? Math.max(...sameVessel.map(x => Number(x.containerNo))) : 1;
+
+    const note = need > 1 ? `<div class="table-note">⚠ 需訂 ${need} 櫃</div>` : "";
 
     tr.innerHTML = `
-      <td>${row.vessel}${multiNote}</td>
+      <td>${row.vessel}${note}</td>
       <td>${row.containerNo}</td>
       <td>${row.clearanceDate}</td>
       <td>${row.sailingDate}</td>
       <td>${row.loadingTime}</td>
       <td>${row.port}</td>
       <td>${row.arrivalDate}</td>
-
-      <td>${renderStatusChip(row.soStatus)}</td>
+      <td>${renderChip(row.soStatus)}</td>
       <td>${row.quarantineTime || t("emptyValue")}</td>
       <td>${row.drugNo || t("emptyValue")}</td>
       <td>${row.quarantineCertNo || t("emptyValue")}</td>
-      <td>${renderStatusChip(row.telexStatus)}</td>
+      <td>${renderChip(row.telexStatus)}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
-function renderStatusChip(status) {
+function renderChip(status) {
   const ok = status === "done";
   return `
     <span class="chip ${ok ? "chip-ok" : "chip-bad"}">
-      <span class="chip-dot"></span>
-      ${ok ? "✔" : "—"}
+      <span class="chip-dot"></span>${ok ? "✔" : "—"}
     </span>
   `;
 }
 
 /* ==============================
-   Calendar
+   Calendar Core
 ============================== */
 function renderCalendar() {
   const grid = document.getElementById("calendar-grid");
   grid.innerHTML = "";
 
-  if (calendarView === "week") renderWeekView();
-  else renderMonthView();
+  if (calendarView === "week") renderWeek();
+  else renderMonth();
 }
 
-function shouldShowEvent(type) {
-  if (calendarEventMode === "both") return true;
-  if (calendarEventMode === "sailing") return type === "sailing";
-  return true;
+function shouldShow(type) {
+  return calendarEventMode === "both" ? true : type === "sailing";
 }
 
-function renderWeekView() {
-  const start = startOfWeek(currentDate);
-  const days = [...Array(7)].map((_, i) => addDays(start, i));
+function formatDate(d) {
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/* --- Week --- */
+function startOfWeek(d) {
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.getFullYear(), d.getMonth(), diff);
+}
+
+function renderWeek() {
+  const start = startOfWeek(new Date(currentDate));
+  const days = [...Array(7)].map((_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
 
   const grid = document.getElementById("calendar-grid");
 
   const header = document.createElement("div");
   header.className = "calendar-week";
-  header.innerHTML = days.map(d => `
-    <div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>
-  `).join("");
+  header.innerHTML = days.map(d => `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`).join("");
   grid.appendChild(header);
 
   const row = document.createElement("div");
@@ -279,17 +280,16 @@ function renderWeekView() {
 
   days.forEach(date => {
     const cell = document.createElement("div");
-    cell.className = "calendar-week-cell";
+    cell.className = "calendar-month-cell";
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach(item => {
-      if (normalizeDate(item.sailingDate) === formatDate(date) &&
-          shouldShowEvent("sailing"))
+      if (item.sailingDate === formatDate(date) && shouldShow("sailing")) {
         cell.innerHTML += `<div class="calendar-event event-sailing">${item.vessel}</div>`;
-
-      if (normalizeDate(item.arrivalDate) === formatDate(date) &&
-          shouldShowEvent("arrival"))
+      }
+      if (item.arrivalDate === formatDate(date) && shouldShow("arrival")) {
         cell.innerHTML += `<div class="calendar-event event-arrival">${item.vessel}</div>`;
+      }
     });
 
     row.appendChild(cell);
@@ -298,15 +298,16 @@ function renderWeekView() {
   grid.appendChild(row);
 }
 
-function renderMonthView() {
+/* --- Month --- */
+function renderMonth() {
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
   const first = new Date(y, m, 1);
-  const start = startOfWeek(first);
+  const start = startOfWeek(new Date(first));
 
-  const days = [...Array(42)].map((_, i) => addDays(start, i));
+  const days = [...Array(42)].map((_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+
   const grid = document.getElementById("calendar-grid");
-
   const box = document.createElement("div");
   box.className = "calendar-month";
 
@@ -316,13 +317,12 @@ function renderMonthView() {
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach(item => {
-      if (normalizeDate(item.sailingDate) === formatDate(date) &&
-          shouldShowEvent("sailing"))
+      if (item.sailingDate === formatDate(date) && shouldShow("sailing")) {
         cell.innerHTML += `<div class="calendar-event event-sailing">${item.vessel}</div>`;
-
-      if (normalizeDate(item.arrivalDate) === formatDate(date) &&
-          shouldShowEvent("arrival"))
+      }
+      if (item.arrivalDate === formatDate(date) && shouldShow("arrival")) {
         cell.innerHTML += `<div class="calendar-event event-arrival">${item.vessel}</div>`;
+      }
     });
 
     box.appendChild(cell);
@@ -332,44 +332,27 @@ function renderMonthView() {
 }
 
 /* ==============================
-   Date Helpers
+   Event Mode Buttons
 ============================== */
-function addDays(d, n) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-}
+function setupEventModeButtons() {
+  const both = document.getElementById("event-mode-both");
+  const sail = document.getElementById("event-mode-sailing");
 
-function startOfWeek(d) {
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
-}
+  if (!both || !sail) return;
 
-function formatDate(d) {
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
-}
+  both.addEventListener("click", () => {
+    calendarEventMode = "both";
+    both.classList.add("active");
+    sail.classList.remove("active");
+    renderCalendar();
+  });
 
-/* ==============================
-   Calendar Event Mode Buttons
-============================== */
-function setupCalendarEventModeToggle() {
-  const btnBoth = document.getElementById("event-mode-both");
-  const btnSailing = document.getElementById("event-mode-sailing");
-
-  if (btnBoth && btnSailing) {
-    btnBoth.addEventListener("click", () => {
-      calendarEventMode = "both";
-      btnBoth.classList.add("active");
-      btnSailing.classList.remove("active");
-      renderCalendar();
-    });
-
-    btnSailing.addEventListener("click", () => {
-      calendarEventMode = "sailing";
-      btnSailing.classList.add("active");
-      btnBoth.classList.remove("active");
-      renderCalendar();
-    });
-  }
+  sail.addEventListener("click", () => {
+    calendarEventMode = "sailing";
+    sail.classList.add("active");
+    both.classList.remove("active");
+    renderCalendar();
+  });
 }
 
 /* ==============================
@@ -377,16 +360,17 @@ function setupCalendarEventModeToggle() {
 ============================== */
 document.addEventListener("DOMContentLoaded", () => {
   setupLanguageToggle();
-  setupCalendarEventModeToggle();
+  setupEventModeButtons();
 
   applyTranslations();
   loadSheetData();
 
-  document.getElementById("search-input")?.addEventListener("input", applyFiltersAndRender);
-  document.getElementById("filter-so")?.addEventListener("change", applyFiltersAndRender);
-  document.getElementById("filter-telex")?.addEventListener("change", applyFiltersAndRender);
+  document.getElementById("search-input").addEventListener("input", applyFiltersAndRender);
+  document.getElementById("filter-so").addEventListener("change", applyFiltersAndRender);
+  document.getElementById("filter-telex").addEventListener("change", applyFiltersAndRender);
 
-  document.querySelectorAll(".tab-button")?.forEach(btn => {
+  /** Tab switching */
+  document.querySelectorAll(".tab-button").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
@@ -398,37 +382,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 週/月切換
+  /** Week / Month switching */
   document.querySelectorAll(".subtab-button").forEach(btn => {
     btn.addEventListener("click", () => {
       calendarView = btn.dataset.calView;
       document.querySelectorAll(".subtab-button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+
       renderCalendar();
     });
   });
 
-  document.getElementById("btn-prev-period")?.addEventListener("click", () => {
+  /** Prev / Next / Today */
+  document.getElementById("btn-prev-period").addEventListener("click", () => {
     currentDate =
       calendarView === "week"
-        ? addDays(currentDate, -7)
+        ? new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     renderCalendar();
   });
 
-  document.getElementById("btn-next-period")?.addEventListener("click", () => {
+  document.getElementById("btn-next-period").addEventListener("click", () => {
     currentDate =
       calendarView === "week"
-        ? addDays(currentDate, 7)
+        ? new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     renderCalendar();
   });
 
-  document.getElementById("btn-today")?.addEventListener("click", () => {
+  document.getElementById("btn-today").addEventListener("click", () => {
     currentDate = new Date();
     renderCalendar();
   });
 
-  // Auto refresh every 3 min
+  /** Auto refresh */
   setInterval(loadSheetData, 180000);
 });
