@@ -507,11 +507,6 @@ function renderWeekView() {
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach((item) => {
-      if (isSameDate(item.clearanceDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-clearance", t("legendClearance"))
-        );
-      }
       if (isSameDate(item.sailingDate, date)) {
         cell.appendChild(
           createCalendarEventChip(item, "event-sailing", t("legendSailing"))
@@ -561,11 +556,6 @@ function renderMonthView() {
     cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
 
     filteredData.forEach((item) => {
-      if (isSameDate(item.clearanceDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-clearance", t("legendClearance"))
-        );
-      }
       if (isSameDate(item.sailingDate, date)) {
         cell.appendChild(
           createCalendarEventChip(item, "event-sailing", t("legendSailing"))
