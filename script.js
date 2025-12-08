@@ -495,8 +495,8 @@ function renderWeekView() {
   .map(
     (d) =>
       `<div class="calendar-weekday">
-        ${d.getMonth() + 1}/${d.getDate()}（${weekdayNames[d.getDay()]}）
-      </div>`
+         ${d.getMonth() + 1}/${d.getDate()}（${weekdayNames[d.getDay()]}）
+       </div>`
   )
   .join("");
   grid.appendChild(header);
@@ -507,7 +507,11 @@ function renderWeekView() {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-week-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
+    cell.innerHTML = `
+  <div class="day-number">
+    ${date.getDate()}（${weekdayNames[date.getDay()]})
+  </div>
+`;
 
     filteredData.forEach((item) => {
       if (isSameDate(item.sailingDate, date)) {
@@ -556,7 +560,11 @@ function renderMonthView() {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-month-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
+    cell.innerHTML = `
+  <div class="day-number">
+    ${date.getDate()}（${weekdayNames[date.getDay()]})
+  </div>
+`;
 
     filteredData.forEach((item) => {
       if (isSameDate(item.sailingDate, date)) {
