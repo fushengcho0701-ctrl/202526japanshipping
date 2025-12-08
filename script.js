@@ -1,6 +1,7 @@
 /* -----------------------------------------------------
    Global Variables & Default Settings
 ----------------------------------------------------- */
+const weekdayNames = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
 let rawData = [];
 let filteredData = [];
 let currentSortKey = "arrivalDate";
@@ -465,8 +466,8 @@ function addDays(date, n) {
 
 function startOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const day = d.getDay(); // 0 = 星期日
+  const diff = d.getDate() - day; // 從星期日開始
   return new Date(d.setDate(diff));
 }
 
@@ -491,11 +492,13 @@ function renderWeekView() {
   const header = document.createElement("div");
   header.className = "calendar-week";
   header.innerHTML = days
-    .map(
-      (d) =>
-        `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}</div>`
-    )
-    .join("");
+  .map(
+    (d) =>
+      `<div class="calendar-weekday">
+        ${d.getMonth() + 1}/${d.getDate()}（${weekdayNames[d.getDay()]}）
+      </div>`
+  )
+  .join("");
   grid.appendChild(header);
 
   const row = document.createElement("div");
