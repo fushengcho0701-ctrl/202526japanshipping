@@ -540,14 +540,23 @@ function startOfWeek(date) {
 
 function createCalendarEventChip(row, typeClass, labelText) {
   const chip = document.createElement("span");
-  chip.className = `calendar-event ${typeClass}`;
+
+  // 空運 → 顯示藍色
+  if (typeClass === "event-sailing" && isAirShipment(row)) {
+    chip.className = `calendar-event event-air`;
+  } else {
+    chip.className = `calendar-event ${typeClass}`;
+  }
+
   chip.textContent = `${labelText}｜${row.vessel}（${formatContainerWithUnit(
     row
   )}）`;
+
   chip.addEventListener("click", (e) => {
     e.stopPropagation();
     showDetailModal(row);
   });
+
   return chip;
 }
 
