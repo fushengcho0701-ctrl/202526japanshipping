@@ -341,15 +341,22 @@ function renderTable() {
       : "";
 
     tr.innerHTML = `
-      <td>
-        <div>${row.vessel || t("emptyValue")}</div>
-        ${warnHtml}
-      </td>
-      <td>${
-  row.vessel.includes("空運")
-    ? `${row.containerNo} 捆`
-    : formatContainerNo(row.containerNo)
-}</td>
+  <td>
+    <div>${row.vessel || t("emptyValue")}</div>
+    ${warnHtml}
+  </td>
+  <td>${
+    row.port.includes("空港")
+      ? `${row.containerNo} 捆`
+      : formatContainerNo(row.containerNo)
+  }</td>
+  <td>${row.clearanceText || t("emptyValue")}</td>
+  <td>${row.sailingText || t("emptyValue")}</td>
+  <td>${row.loadingText || t("emptyValue")}</td>
+  <td>${row.port || t("emptyValue")}</td>
+  <td>${row.arrivalText || t("emptyValue")}</td>
+  ...
+`;
       <td>${row.clearanceText || t("emptyValue")}</td>
       <td>${row.sailingText || t("emptyValue")}</td>
       <td>${row.loadingText || t("emptyValue")}</td>
