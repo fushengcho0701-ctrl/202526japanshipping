@@ -466,10 +466,11 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   if (calendarView === "week") {
-    renderWeekView();
-  } else {
-    renderMonthView();
-  }
+  renderWeekView(false);
+} else if (calendarView === "month") {
+  renderMonthView(false);
+} else if (calendarView === "sailing-only") {
+  renderWeekView(true);  // 用週視圖呈現單一事件
 }
 
 function addDays(date, n) {
@@ -496,7 +497,7 @@ function createCalendarEventChip(row, typeClass, labelText) {
   return chip;
 }
 
-function renderWeekView() {
+function renderWeekView(onlySailing = false) {
   const grid = document.getElementById("calendar-grid");
   const start = startOfWeek(currentDate);
   const days = [...Array(7)].map((_, i) => addDays(start, i));
@@ -526,17 +527,19 @@ function renderWeekView() {
 `;
 
     filteredData.forEach((item) => {
-      if (isSameDate(item.sailingDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
-        );
-      }
-      if (isSameDate(item.arrivalDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-arrival", t("legendArrival"))
-        );
-      }
-    });
+// 開船事件永遠顯示
+if (isSameDate(item.sailingDate, date)) {
+  cell.appendChild(
+    createCalendarEventChip(item, "event-sailing", t("legendSailing"))
+  );
+}
+
+// 開船-only 模式時不顯示抵達事件
+if (!onlySailing && isSameDate(item.arrivalDate, date)) {
+  cell.appendChild(
+    createCalendarEventChip(item, "event-arrival", t("legendArrival"))
+  );
+}
 
     row.appendChild(cell);
   });
