@@ -682,3 +682,13 @@ tr:hover td {
     width: 100%;
   }
 }
+/* 空運（藍色） */
+.calendar-event.event-air {
+  background-color: #4D9FFF; /* 亮藍 */
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 13px;
+}
