@@ -336,9 +336,10 @@ function renderTable() {
     const tr = document.createElement("tr");
 
     const needMulti = row.totalContainers && row.totalContainers > 1;
-    const warnHtml = needMulti
-      ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} 櫃</div>`
-      : "";
+     const unit = row.port.includes("空港") ? "捆" : "櫃";
+     const warnHtml = needMulti
+  ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} ${unit}</div>`
+  : "";
 
     tr.innerHTML = `
   <td>
