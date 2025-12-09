@@ -483,8 +483,46 @@ function renderCalendar() {
     renderWeekView(false);
   } else if (calendarView === "month") {
     renderMonthView();
-  } else if (calendarView === "sailing-only") {
-    renderWeekView(true); // 只顯示開船事件
+} else if (calendarView === "sailing-only") {
+    renderMonthViewSailingOnly(); // 只顯示開船事件（月視圖版）
+  }
+}
+function renderMonthViewSailingOnly() {
+  const grid = document.getElementById("calendar-grid");
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+
+  const first = new Date(y, m, 1);
+  const start = startOfWeek(first);
+  const days = [...Array(42)].map((_, i) => addDays(start, i));
+
+  const box = document.createElement("div");
+  box.className = "calendar-month";
+
+  days.forEach((date) => {
+    const cell = document.createElement("div");
+    cell.className = "calendar-month-cell";
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
+      weekdayNames[date.getDay()]
+    }）</div>`;
+
+    filteredData.forEach((item) => {
+      // 只顯示開船事件
+      if (isSameDate(item.sailingDate, date)) {
+        cell.appendChild(
+          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
+        );
+      }
+    });
+
+    box.appendChild(cell);
+  });
+
+  grid.appendChild(box);
+
+  const label = document.getElementById("period-label");
+  if (label) {
+    label.textContent = `${y}/${m + 1}`;
   }
 }
 
