@@ -1,16 +1,18 @@
 /* -----------------------------------------------------
    Global Variables & Default Settings
 ----------------------------------------------------- */
-const weekdayNames = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
 let rawData = [];
 let filteredData = [];
-let currentSortKey = "sailingDate";
+let currentSortKey = "sailingDate"; // 預設依實際開船時間排序
 let currentSortOrder = "asc";
 let currentLang = localStorage.getItem("lang") || "zh";
 
 let calendarView = "week";
 let currentDate = new Date();
 let maxContainersByGroup = {};
+
+/* 星期顯示 */
+const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
 
 /* -----------------------------------------------------
    i18n Dictionary
@@ -132,9 +134,30 @@ function applyTranslations() {
   });
 }
 
+/** 判斷是否為空運（抵達港口包含「空港」） */
+function isAirShipment(row) {
+  return (row.port || "").includes("空港");
+}
+
+/** 櫃次／捆數顯示（含單位） */
+function formatContainerWithUnit(row) {
+  const n = row.containerNo;
+  if (!n || isNaN(n)) return t("emptyValue");
+  if (isAirShipment(row)) {
+    return `${n} 捆`;
+  }
+  return `第 ${n} 櫃`;
+}
+
+/** 原本的單純數字→櫃顯示，只在需要時使用 */
 function formatContainerNo(n) {
   if (!n || isNaN(n)) return t("emptyValue");
   return `第 ${n} 櫃`;
+}
+
+/** 取得總量用的單位（櫃 / 捆） */
+function getTotalUnit(row) {
+  return isAirShipment(row) ? "捆" : "櫃";
 }
 
 function setupLanguageToggle() {
@@ -336,28 +359,17 @@ function renderTable() {
     const tr = document.createElement("tr");
 
     const needMulti = row.totalContainers && row.totalContainers > 1;
-     const unit = row.port.includes("空港") ? "捆" : "櫃";
-     const warnHtml = needMulti
-  ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} ${unit}</div>`
-  : "";
+    const unit = getTotalUnit(row);
+    const warnHtml = needMulti
+      ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} ${unit}</div>`
+      : "";
 
     tr.innerHTML = `
-  <td>
-    <div>${row.vessel || t("emptyValue")}</div>
-    ${warnHtml}
-  </td>
-  <td>${
-    row.port.includes("空港")
-      ? `${row.containerNo} 捆`
-      : formatContainerNo(row.containerNo)
-  }</td>
-  <td>${row.clearanceText || t("emptyValue")}</td>
-  <td>${row.sailingText || t("emptyValue")}</td>
-  <td>${row.loadingText || t("emptyValue")}</td>
-  <td>${row.port || t("emptyValue")}</td>
-  <td>${row.arrivalText || t("emptyValue")}</td>
-  ...
-`;
+      <td>
+        <div>${row.vessel || t("emptyValue")}</div>
+        ${warnHtml}
+      </td>
+      <td>${formatContainerWithUnit(row)}</td>
       <td>${row.clearanceText || t("emptyValue")}</td>
       <td>${row.sailingText || t("emptyValue")}</td>
       <td>${row.loadingText || t("emptyValue")}</td>
@@ -427,16 +439,18 @@ function showDetailModal(row) {
   const title = document.getElementById("modal-title");
   if (!backdrop || !list || !title) return;
 
-  title.textContent = `${row.vessel}（${formatContainerNo(row.containerNo)}）`;
+  title.textContent = `${row.vessel}（${formatContainerWithUnit(row)}）`;
 
   const totalLine =
     row.totalContainers && row.totalContainers > 1
-      ? `<dt>${t("modalTotalContainers")}</dt><dd>${row.totalContainers} 櫃</dd>`
+      ? `<dt>${t("modalTotalContainers")}</dt><dd>${row.totalContainers} ${getTotalUnit(
+          row
+        )}</dd>`
       : "";
 
   list.innerHTML = `
     <dt>${t("colVessel")}</dt><dd>${row.vessel}</dd>
-    <dt>${t("colContainerNo")}</dt><dd>${formatContainerNo(row.containerNo)}</dd>
+    <dt>${t("colContainerNo")}</dt><dd>${formatContainerWithUnit(row)}</dd>
     ${totalLine}
     <dt>${t("colClearanceDate")}</dt><dd>${row.clearanceText || t("emptyValue")}</dd>
     <dt>${t("colSailingTime")}</dt><dd>${row.sailingText || t("emptyValue")}</dd>
@@ -466,20 +480,22 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   if (calendarView === "week") {
-  renderWeekView(false);
-} else if (calendarView === "month") {
-  renderMonthView(false);
-} else if (calendarView === "sailing-only") {
-  renderWeekView(true);  // 用週視圖呈現單一事件
+    renderWeekView(false);
+  } else if (calendarView === "month") {
+    renderMonthView();
+  } else if (calendarView === "sailing-only") {
+    renderWeekView(true); // 只顯示開船事件
+  }
 }
 
 function addDays(date, n) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
 }
 
+/** 以「星期日」為週起始 */
 function startOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = 星期日
+  const day = d.getDay(); // 0 = Sunday
   const diff = d.getDate() - day; // 從星期日開始
   return new Date(d.setDate(diff));
 }
@@ -487,8 +503,8 @@ function startOfWeek(date) {
 function createCalendarEventChip(row, typeClass, labelText) {
   const chip = document.createElement("span");
   chip.className = `calendar-event ${typeClass}`;
-  chip.textContent = `${labelText}｜${row.vessel}（${formatContainerNo(
-    row.containerNo
+  chip.textContent = `${labelText}｜${row.vessel}（${formatContainerWithUnit(
+    row
   )}）`;
   chip.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -497,6 +513,7 @@ function createCalendarEventChip(row, typeClass, labelText) {
   return chip;
 }
 
+/** 週視圖：onlySailing=true 時只顯示開船事件 */
 function renderWeekView(onlySailing = false) {
   const grid = document.getElementById("calendar-grid");
   const start = startOfWeek(currentDate);
@@ -505,13 +522,13 @@ function renderWeekView(onlySailing = false) {
   const header = document.createElement("div");
   header.className = "calendar-week";
   header.innerHTML = days
-  .map(
-    (d) =>
-      `<div class="calendar-weekday">
-         ${d.getMonth() + 1}/${d.getDate()}（${weekdayNames[d.getDay()]}）
-       </div>`
-  )
-  .join("");
+    .map(
+      (d) =>
+        `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}（${
+          weekdayNames[d.getDay()]
+        }）</div>`
+    )
+    .join("");
   grid.appendChild(header);
 
   const row = document.createElement("div");
@@ -520,26 +537,23 @@ function renderWeekView(onlySailing = false) {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-week-cell";
-    cell.innerHTML = `
-  <div class="day-number">
-    ${date.getDate()}（${weekdayNames[date.getDay()]})
-  </div>
-`;
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
+      weekdayNames[date.getDay()]
+    }）</div>`;
 
     filteredData.forEach((item) => {
-// 開船事件永遠顯示
-if (isSameDate(item.sailingDate, date)) {
-  cell.appendChild(
-    createCalendarEventChip(item, "event-sailing", t("legendSailing"))
-  );
-}
-
-// 開船-only 模式時不顯示抵達事件
-if (!onlySailing && isSameDate(item.arrivalDate, date)) {
-  cell.appendChild(
-    createCalendarEventChip(item, "event-arrival", t("legendArrival"))
-  );
-}
+      // 結關事件已移除，不再顯示
+      if (isSameDate(item.sailingDate, date)) {
+        cell.appendChild(
+          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
+        );
+      }
+      if (!onlySailing && isSameDate(item.arrivalDate, date)) {
+        cell.appendChild(
+          createCalendarEventChip(item, "event-arrival", t("legendArrival"))
+        );
+      }
+    });
 
     row.appendChild(cell);
   });
@@ -575,13 +589,12 @@ function renderMonthView() {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-month-cell";
-    cell.innerHTML = `
-  <div class="day-number">
-    ${date.getDate()}（${weekdayNames[date.getDay()]})
-  </div>
-`;
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
+      weekdayNames[date.getDay()]
+    }）</div>`;
 
     filteredData.forEach((item) => {
+      // 結關事件已移除，不再顯示
       if (isSameDate(item.sailingDate, date)) {
         cell.appendChild(
           createCalendarEventChip(item, "event-sailing", t("legendSailing"))
@@ -669,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnPrev) {
     btnPrev.addEventListener("click", () => {
       currentDate =
-        calendarView === "week"
+        calendarView === "week" || calendarView === "sailing-only"
           ? addDays(currentDate, -7)
           : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
       renderCalendar();
@@ -680,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnNext) {
     btnNext.addEventListener("click", () => {
       currentDate =
-        calendarView === "week"
+        calendarView === "week" || calendarView === "sailing-only"
           ? addDays(currentDate, 7)
           : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
       renderCalendar();
@@ -708,5 +721,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // 每 3 分鐘自動重新載入資料
   setInterval(loadSheetData, 180000);
 });
