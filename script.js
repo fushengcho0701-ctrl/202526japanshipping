@@ -538,24 +538,43 @@ function startOfWeek(date) {
   return new Date(d.setDate(diff));
 }
 
-function createCalendarEventChip(row, typeClass, labelText) {
-  const chip = document.createElement("span");
+function createCalendarEventChip(item, className, typeLabel) {
+  const chip = document.createElement("div");
+  chip.className = `event-chip ${className}`;
+  
+  // 建立標題容器
+  const titleElem = document.createElement("div");
+  titleElem.className = "event-title";
+  
+  // 基礎標題：船名（櫃號）
+  let displayHTML = item.title;
 
-  // 空運 → 顯示藍色
-  if (typeClass === "event-sailing" && isAirShipment(row)) {
-    chip.className = `calendar-event event-air`;
-  } else {
-    chip.className = `calendar-event ${typeClass}`;
+  // 重點修改：如果是開船事件，且目前是「只看開船」模式 (onlySailing變數應為全域或可取得)
+  // 這裡我們判斷 className 是否包含 'event-sailing'
+  if (className.includes("event-sailing") && typeof currentViewMode !== 'undefined' && currentViewMode === 'onlySailing') {
+    if (item.arrivalDate) {
+      const arr = new Date(item.arrivalDate);
+      const m = arr.getMonth() + 1;
+      const d = arr.getDate();
+      const w = weekdayNames[arr.getDay()];
+      
+      // 加上換行與抵達日資訊
+      displayHTML += `<div class="arrival-info" style="border-top: 1px dashed rgba(255,255,255,0.5); margin-top: 3px; padding-top: 2px; font-weight: normal; font-size: 0.85em;">`;
+      displayHTML += `抵達日：${m}/${d}（${w}）`;
+      displayHTML += `</div>`;
+    }
   }
 
-  chip.textContent = `${labelText}｜${row.vessel}（${formatContainerWithUnit(
-    row
-  )}）`;
+  titleElem.innerHTML = displayHTML;
+  chip.appendChild(titleElem);
 
-  chip.addEventListener("click", (e) => {
-    e.stopPropagation();
-    showDetailModal(row);
-  });
+  // 如果有類別標籤（如：開船）
+  if (typeLabel) {
+    const labelElem = document.createElement("div");
+    labelElem.className = "event-label";
+    labelElem.textContent = typeLabel;
+    chip.appendChild(labelElem);
+  }
 
   return chip;
 }
