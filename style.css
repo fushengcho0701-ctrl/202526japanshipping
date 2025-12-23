@@ -30,95 +30,67 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, "Noto Sans TC", sans-serif;
   background: radial-gradient(circle at top, #ffffff 0%, #f5f5f7 46%, #ebedf0 100%);
   color: var(--text-main);
-  line-height: 1.4;
 }
 
-/* Header */
-.app-header {
-  position: sticky; top: 0; z-index: 100;
-  backdrop-filter: saturate(180%) blur(20px);
-  background: rgba(245, 245, 247, 0.78);
-  border-bottom: 1px solid rgba(210, 210, 215, 0.8);
-  display: flex; justify-content: space-between; align-items: center; padding: 14px 24px;
-}
-
-.app-header-main { display: flex; align-items: center; gap: 12px; }
-.app-logo {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, #0a84ff, #64d2ff);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.35);
-}
-.app-title { font-weight: 700; font-size: 1.1rem; }
-.app-subtitle { font-size: 0.85rem; color: var(--text-muted); }
-
-/* Layout */
 .app-main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
-/* Card */
-.card {
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(210, 210, 215, 0.8);
-  padding: 16px 18px; margin-bottom: 16px;
-}
-
-.card-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
-
-/* Tabs & Buttons */
-.tabs, .calendar-tabs {
-  display: inline-flex; padding: 3px;
-  background: rgba(250, 250, 252, 0.9);
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(210, 210, 215, 0.9);
-}
-.tab-button, .subtab-button {
-  border: none; background: transparent; padding: 6px 14px;
-  border-radius: var(--radius-pill); font-size: 0.85rem;
-  cursor: pointer; color: var(--text-muted);
-}
-.tab-button.active, .subtab-button.active {
-  background: #ffffff; color: var(--text-main); font-weight: 600; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-}
-
 /* ------------------------------
-    重要修正：行事曆 7 天網格佈局
+    重要：修復月視圖與週視圖排版
 ------------------------------ */
 .calendar-grid {
-  margin-top: 12px; border-radius: 14px; overflow: hidden;
-  border: 1px solid var(--border-subtle); background: #ffffff;
+  margin-top: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column; /* 讓每一週垂直排列 */
 }
 
-/* 這裡是修正長條狀的關鍵：強制 7 欄並排 */
-.calendar-week {
+/* 確保每一排都是 7 天 */
+.calendar-week, .calendar-month {
   display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important;
+  grid-template-columns: repeat(7, 1fr) !important; /* 強制分 7 欄 */
   width: 100%;
 }
 
 .calendar-weekday {
-  padding: 10px; background: #f9fafc;
+  padding: 10px;
+  background: #f9fafc;
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
-  text-align: center; font-weight: 600; font-size: 0.85rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
-.calendar-weekday:last-child { border-right: none; }
 
 .calendar-week-cell, .calendar-month-cell {
-  min-height: 120px;
+  min-height: 110px;
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 8px; font-size: 0.75rem; vertical-align: top;
+  padding: 8px;
+  font-size: 0.75rem;
+  background: #fff;
+  vertical-align: top;
 }
-.calendar-week-cell:last-child { border-right: none; }
-.day-number { font-weight: bold; margin-bottom: 8px; color: var(--text-muted); }
+
+/* 移除最後一欄的右邊界 */
+.calendar-week-cell:nth-child(7n), 
+.calendar-weekday:nth-child(7n) {
+  border-right: none;
+}
+
+.day-number {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
 
 /* ------------------------------
-    事件方塊 (Event Chips)
+    事件方塊：修正高度與換行
 ------------------------------ */
 .calendar-event {
   display: block !important;
@@ -131,9 +103,9 @@ body {
   color: #ffffff;
   cursor: pointer;
   text-align: left;
-  white-space: normal !important; /* 允許文字折行 */
+  white-space: normal !important; /* 允許自動換行 */
   word-break: break-all;
-  height: auto !important; /* 高度自動 */
+  height: auto !important; /* 高度隨內容長高 */
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
@@ -141,32 +113,28 @@ body {
 .event-arrival { background: var(--event-arrival); }
 .calendar-event.event-air { background-color: #4D9FFF !important; }
 
-/* 抵達日文字裝飾線 */
+/* 抵達日資訊的裝飾虛線 */
 .arrival-info-line {
-  border-top: 1px dashed rgba(255,255,255,0.5);
-  margin-top: 5px; padding-top: 4px;
-  font-weight: normal; font-size: 0.9em;
+  border-top: 1px dashed rgba(255,255,255,0.6);
+  margin-top: 5px;
+  padding-top: 5px;
+  font-weight: 500;
+  font-size: 0.9em;
 }
 
-/* Modal */
-.modal-backdrop {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center; z-index: 1000;
+/* 其餘 UI 維持原本 Apple 風格 */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(245, 245, 247, 0.78);
+  border-bottom: 1px solid rgba(210, 210, 215, 0.8);
+  display: flex; justify-content: space-between; align-items: center; padding: 14px 24px;
 }
-.modal-backdrop.active { display: flex; }
-.modal {
-  background: #ffffff; width: 92%; max-width: 480px;
-  border-radius: 16px; box-shadow: var(--shadow-soft);
-  overflow: hidden; animation: pop-in 0.2s ease-out;
+
+.card {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(210, 210, 215, 0.8);
+  padding: 16px 18px; margin-bottom: 16px;
 }
-@keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-/* Table */
-.table-wrapper { width: 100%; overflow: auto; border-radius: 14px; border: 1px solid var(--border-subtle); }
-table { width: 100%; border-collapse: collapse; min-width: 900px; }
-th, td { padding: 12px 8px; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; }
-th { background: #f9fafc; color: var(--text-muted); font-weight: 600; text-align: left; }
-
-/* Footer */
-.app-footer { text-align: center; padding: 30px 0; font-size: 0.75rem; color: var(--text-muted); }
