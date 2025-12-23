@@ -33,96 +33,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, "Noto Sans TC", sans-serif;
   background: radial-gradient(circle at top, #ffffff 0%, #f5f5f7 46%, #ebedf0 100%);
   color: var(--text-main);
-}
-
-.app-main { max-width: 1200px; margin: 0 auto; padding: 16px; }
-
-/* ------------------------------
-    重要：修復月視圖與週視圖排版
------------------------------- */
-.calendar-grid {
-  margin-top: 12px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  background: #ffffff;
-  display: flex;
-  flex-direction: column; /* 讓每一週垂直排列 */
-}
-
-/* 確保每一排都是 7 天 */
-.calendar-week, .calendar-month {
-  display: grid !important;
-  grid-template-columns: repeat(7, 1fr) !important; /* 強制分 7 欄 */
-  width: 100%;
-}
-
-.calendar-weekday {
-  padding: 10px;
-  background: #f9fafc;
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.calendar-week-cell, .calendar-month-cell {
-  min-height: 110px;
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 8px;
-  font-size: 0.75rem;
-  background: #fff;
-  vertical-align: top;
-}
-
-/* 移除最後一欄的右邊界 */
-.calendar-week-cell:nth-child(7n), 
-.calendar-weekday:nth-child(7n) {
-  border-right: none;
-}
-
-.day-number {
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 /* ------------------------------
-    事件方塊：修正高度與換行
+    原本的 UI 組件 (Header, Tabs, Search)
 ------------------------------ */
-.calendar-event {
-  display: block !important;
-  width: 100%;
-  font-size: 0.75rem;
-  line-height: 1.4 !important;
-  padding: 6px 8px !important;
-  margin-bottom: 6px;
-  border-radius: 8px !important;
-  color: #ffffff;
-  cursor: pointer;
-  text-align: left;
-  white-space: normal !important; /* 允許自動換行 */
-  word-break: break-all;
-  height: auto !important; /* 高度隨內容長高 */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.event-sailing { background: var(--event-sailing); }
-.event-arrival { background: var(--event-arrival); }
-.calendar-event.event-air { background-color: #4D9FFF !important; }
-
-/* 抵達日資訊的裝飾虛線 */
-.arrival-info-line {
-  border-top: 1px dashed rgba(255,255,255,0.6);
-  margin-top: 5px;
-  padding-top: 5px;
-  font-weight: 500;
-  font-size: 0.9em;
-}
-
-/* 其餘 UI 維持原本 Apple 風格 */
 .app-header {
   position: sticky; top: 0; z-index: 100;
   backdrop-filter: saturate(180%) blur(20px);
@@ -130,6 +46,15 @@ body {
   border-bottom: 1px solid rgba(210, 210, 215, 0.8);
   display: flex; justify-content: space-between; align-items: center; padding: 14px 24px;
 }
+.app-header-main { display: flex; align-items: center; gap: 12px; }
+.app-logo {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #0a84ff, #64d2ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.35);
+}
+.app-title { font-weight: 700; font-size: 1.1rem; }
+.app-main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
 .card {
   background: rgba(255, 255, 255, 0.96);
@@ -137,4 +62,78 @@ body {
   box-shadow: var(--shadow-soft);
   border: 1px solid rgba(210, 210, 215, 0.8);
   padding: 16px 18px; margin-bottom: 16px;
+}
+
+/* ------------------------------
+    原本的 列表視圖 (不變動)
+------------------------------ */
+.table-wrapper { width: 100%; overflow: auto; border-radius: 14px; border: 1px solid var(--border-subtle); }
+table { width: 100%; border-collapse: collapse; min-width: 950px; background: #fff; }
+th, td { padding: 12px 10px; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; text-align: left; }
+th { background: #f9fafc; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+
+/* ------------------------------
+    核心修正：行事曆 7 天網格 (只影響 calendar-grid)
+------------------------------ */
+.calendar-grid {
+  margin-top: 12px; border: 1px solid var(--border-subtle);
+  border-radius: 14px; overflow: hidden; background: #fff;
+  display: flex; flex-direction: column;
+}
+
+/* 強制每一橫排都是 7 欄並排 */
+.calendar-week {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  width: 100% !important;
+}
+
+.calendar-weekday {
+  padding: 10px; background: #f9fafc; text-align: center;
+  font-weight: 600; font-size: 0.85rem; border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.calendar-week-cell, .calendar-month-cell {
+  min-height: 120px; padding: 10px; border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle); background: #fff;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+/* 每排最後一格去掉右邊框 */
+.calendar-weekday:nth-child(7n), .calendar-week-cell:nth-child(7n) { border-right: none !important; }
+
+/* ------------------------------
+    行事曆事件方塊 (改回自適應高度)
+------------------------------ */
+.calendar-event {
+  display: block !important; width: 100%; padding: 6px 8px !important;
+  margin-bottom: 4px; border-radius: 6px !important; color: #fff;
+  font-size: 0.75rem; line-height: 1.4 !important; cursor: pointer;
+  white-space: normal !important; word-break: break-all; height: auto !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.event-sailing { background-color: var(--event-sailing) !important; }
+.event-arrival { background-color: var(--event-arrival) !important; }
+.event-air { background-color: #4D9FFF !important; }
+
+/* 抵達日資訊 */
+.arrival-info-line {
+  border-top: 1px dashed rgba(255,255,255,0.5);
+  margin-top: 4px; padding-top: 4px; font-weight: 500; font-size: 0.9em;
+}
+
+/* Modal & 其他 UI */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-backdrop.active { display: flex; }
+.modal { background: #fff; width: 90%; max-width: 480px; border-radius: 20px; overflow: hidden; }
+
+/* RWD */
+@media (max-width: 600px) {
+  .app-header { flex-direction: column; padding: 10px; }
+  .calendar-week { grid-template-columns: repeat(7, 1fr) !important; }
 }
