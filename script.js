@@ -560,7 +560,7 @@ function createCalendarEventChip(row, typeClass, labelText) {
   return chip;
 }
 
-/** 週視圖：onlySailing=true 時只顯示開船事件 */
+/** 週視圖：onlySailing=true 時只顯示開船事件並加註抵達日 */
 function renderWeekView(onlySailing = false) {
   const grid = document.getElementById("calendar-grid");
   const start = startOfWeek(currentDate);
@@ -589,12 +589,26 @@ function renderWeekView(onlySailing = false) {
     }）</div>`;
 
     filteredData.forEach((item) => {
-      // 結關事件已移除，不再顯示
+      // 處理開船事件
       if (isSameDate(item.sailingDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
-        );
+        const chip = createCalendarEventChip(item, "event-sailing", t("legendSailing"));
+        
+        // 如果是「只看開船」模式，額外注入抵達日資訊
+        if (onlySailing && item.arrivalDate) {
+          const arr = new Date(item.arrivalDate);
+          const arrM = arr.getMonth() + 1;
+          const arrD = arr.getDate();
+          const arrW = weekdayNames[arr.getDay()];
+          
+          // 找到 chip 內的文字容器並修改
+          const titleElem = chip.querySelector('.event-title') || chip;
+          titleElem.innerHTML = `${item.title}<div style="border-top: 1px dashed #ccc; margin-top: 4px; padding-top: 2px; color: #d93025;">新增 *抵達日* ${arrM}/${arrD}（${arrW}）</div>`;
+        }
+        
+        cell.appendChild(chip);
       }
+
+      // 如果不是只看開船，才顯示獨立的「抵達」方塊
       if (!onlySailing && isSameDate(item.arrivalDate, date)) {
         cell.appendChild(
           createCalendarEventChip(item, "event-arrival", t("legendArrival"))
