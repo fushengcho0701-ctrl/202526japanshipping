@@ -1,5 +1,5 @@
 /* ------------------------------
-   Base Apple Style Variables
+    Base Apple Style Variables
 ------------------------------ */
 :root {
   --bg: #f5f5f7;
@@ -317,21 +317,6 @@ th {
   cursor: pointer;
 }
 
-th::after {
-  content: "";
-  margin-left: 4px;
-  font-size: 0.7rem;
-  opacity: 0.6;
-}
-
-th[data-sort-active="asc"]::after {
-  content: "▲";
-}
-
-th[data-sort-active="desc"]::after {
-  content: "▼";
-}
-
 tr:hover td {
   background: #fafafa;
 }
@@ -347,13 +332,6 @@ tr:hover td {
   font-weight: 600;
 }
 
-.chip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
 .chip-ok {
   background: var(--success-bg);
   color: var(--success-text);
@@ -361,13 +339,6 @@ tr:hover td {
 
 .chip-bad {
   background: var(--danger-bg);
-  color: var(--danger-text);
-}
-
-/* Multi-container warning under vessel */
-.table-note {
-  margin-top: 4px;
-  font-size: 0.75rem;
   color: var(--danger-text);
 }
 
@@ -384,86 +355,8 @@ tr:hover td {
   gap: 4px;
 }
 
-.btn-ghost {
-  background: transparent;
-}
-
 .btn:hover {
   background: #e5e5ea;
-}
-
-/* Calendar */
-.calendar-header {
-  flex-wrap: wrap;
-}
-
-.calendar-top-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
-}
-
-.calendar-tabs {
-  background: rgba(245, 245, 247, 0.9);
-  border-radius: var(--radius-pill);
-  padding: 2px;
-  border: 1px solid rgba(210, 210, 215, 0.9);
-  display: inline-flex;
-}
-
-.subtab-button {
-  border: none;
-  background: transparent;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  cursor: pointer;
-  color: var(--text-muted);
-}
-
-.subtab-button.active {
-  background: #ffffff;
-  color: var(--text-main);
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.calendar-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.calendar-period-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* Legend */
-.calendar-legend {
-  display: flex;
-  gap: 16px;
-  margin: 10px 0;
-  font-size: 0.8rem;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.legend-clearance {
-  background: var(--event-clearance);
-}
-
-.legend-sailing {
-  background: var(--event-sailing);
-}
-
-.legend-arrival {
-  background: var(--event-arrival);
 }
 
 /* Calendar grid */
@@ -475,7 +368,6 @@ tr:hover td {
   background: #ffffff;
 }
 
-/* Week view */
 .calendar-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -491,70 +383,30 @@ tr:hover td {
   font-size: 0.85rem;
 }
 
-.calendar-weekday:last-child {
-  border-right: none;
-}
-
-/* Week cells */
-.calendar-week-cell {
-  min-height: 90px;
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 4px;
-  font-size: 0.75rem;
-  position: relative;
-}
-
-.calendar-week-cell:last-child {
-  border-right: none;
-}
-
-.calendar-week-cell .day-number {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-/* Month view */
-.calendar-month {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-
-.calendar-month-cell {
+.calendar-week-cell, .calendar-month-cell {
   min-height: 100px;
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 4px;
+  padding: 6px;
   font-size: 0.75rem;
+  vertical-align: top; /* 確保內容從頂部開始 */
 }
 
-.calendar-month-cell:nth-child(7n) {
-  border-right: none;
-}
-
-.calendar-month-cell .day-number {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-/* Calendar event chips */
+/* --- 核心修改：讓事件方塊可以撐開 --- */
 .calendar-event {
-  display: block;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  margin-bottom: 2px;
-  border-radius: var(--radius-pill);
+  display: block !important; /* 改為區塊以支援換行 */
+  font-size: 0.75rem;
+  padding: 5px 8px !important;
+  margin-bottom: 4px;
+  border-radius: 8px !important; /* 稍微減少圓角，文字排版較美 */
   color: #ffffff;
   cursor: pointer;
-  opacity: 0.92;
-}
-
-.calendar-event:hover {
-  opacity: 1;
-}
-
-.event-clearance {
-  background: var(--event-clearance);
+  opacity: 0.95;
+  height: auto !important; /* 高度自動 */
+  white-space: normal !important; /* 允許文字折行 */
+  line-height: 1.4 !important;
+  word-break: break-all;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .event-sailing {
@@ -563,6 +415,18 @@ tr:hover td {
 
 .event-arrival {
   background: var(--event-arrival);
+}
+
+.calendar-event.event-air {
+  background-color: #4D9FFF !important;
+}
+
+/* 抵達日專用樣式 */
+.arrival-info-line {
+  border-top: 1px dashed rgba(255,255,255,0.5);
+  margin-top: 4px;
+  padding-top: 4px;
+  font-weight: 500;
 }
 
 /* Modal */
@@ -588,58 +452,6 @@ tr:hover td {
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
   overflow: hidden;
-  animation: pop-in 0.18s ease-out;
-}
-
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.88);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.modal-header {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-title {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.modal-close {
-  border: none;
-  background: transparent;
-  font-size: 1.4rem;
-  cursor: pointer;
-}
-
-.modal-body {
-  padding: 16px 18px;
-}
-
-.modal-body dl {
-  margin: 0;
-}
-
-.modal-body dt {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-top: 8px;
-}
-
-.modal-body dd {
-  margin: 0 0 4px 0;
-  font-size: 0.85rem;
-  font-weight: 600;
 }
 
 /* Footer */
@@ -648,47 +460,4 @@ tr:hover td {
   padding: 20px 0 30px;
   font-size: 0.75rem;
   color: var(--text-muted);
-}
-
-.app-footer .dot {
-  margin: 0 6px;
-}
-
-/* Responsive */
-@media (max-width: 880px) {
-  .card-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .controls-right {
-    justify-content: space-between;
-  }
-  .table-wrapper {
-    overflow-x: auto;
-  }
-}
-
-@media (max-width: 600px) {
-  .app-header {
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px 16px;
-  }
-  .controls-right {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .search-group {
-    width: 100%;
-  }
-}
-/* 空運（藍色） */
-.calendar-event.event-air {
-  background-color: #4D9FFF; /* 亮藍 */
-  color: #fff;
-  border-radius: 20px;
-  padding: 4px 10px;
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 13px;
 }
