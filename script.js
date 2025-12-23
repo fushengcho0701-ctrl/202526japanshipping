@@ -538,43 +538,44 @@ function startOfWeek(date) {
   return new Date(d.setDate(diff));
 }
 
-function createCalendarEventChip(item, className, typeLabel) {
-  const chip = document.createElement("div");
-  chip.className = `event-chip ${className}`;
-  
-  // 建立標題容器
-  const titleElem = document.createElement("div");
-  titleElem.className = "event-title";
-  
-  // 基礎標題：船名（櫃號）
-  let displayHTML = item.title;
+function createCalendarEventChip(row, typeClass, labelText) {
+  const chip = document.createElement("span");
 
-  // 重點修改：如果是開船事件，且目前是「只看開船」模式 (onlySailing變數應為全域或可取得)
-  // 這裡我們判斷 className 是否包含 'event-sailing'
-  if (className.includes("event-sailing") && typeof currentViewMode !== 'undefined' && currentViewMode === 'onlySailing') {
-    if (item.arrivalDate) {
-      const arr = new Date(item.arrivalDate);
-      const m = arr.getMonth() + 1;
-      const d = arr.getDate();
-      const w = weekdayNames[arr.getDay()];
-      
-      // 加上換行與抵達日資訊
-      displayHTML += `<div class="arrival-info" style="border-top: 1px dashed rgba(255,255,255,0.5); margin-top: 3px; padding-top: 2px; font-weight: normal; font-size: 0.85em;">`;
-      displayHTML += `抵達日：${m}/${d}（${w}）`;
-      displayHTML += `</div>`;
-    }
+  // 設定基礎類別
+  if (typeClass === "event-sailing" && isAirShipment(row)) {
+    chip.className = `calendar-event event-air`;
+  } else {
+    chip.className = `calendar-event ${typeClass}`;
   }
 
-  titleElem.innerHTML = displayHTML;
-  chip.appendChild(titleElem);
+  // 強制修正樣式，讓它可以換行並撐開高度
+  chip.style.display = "block";      // 從 span 改為區塊元素
+  chip.style.height = "auto";       // 高度自動
+  chip.style.minHeight = "24px";    // 設定最小高度
+  chip.style.whiteSpace = "normal"; // 允許換行
+  chip.style.marginBottom = "4px";  // 方塊間距
 
-  // 如果有類別標籤（如：開船）
-  if (typeLabel) {
-    const labelElem = document.createElement("div");
-    labelElem.className = "event-label";
-    labelElem.textContent = typeLabel;
-    chip.appendChild(labelElem);
+  let content = `${labelText}｜${row.vessel}（${formatContainerWithUnit(row)}）`;
+
+  // 判斷是否顯示抵達日 (移除複雜判斷，先確保能顯示)
+  if (typeClass === "event-sailing" && row.arrivalDate) {
+    const arr = new Date(row.arrivalDate);
+    const m = arr.getMonth() + 1;
+    const d = arr.getDate();
+    const w = weekdayNames[arr.getDay()];
+    
+    // 增加一個明顯的區隔線與顏色
+    content += `<div style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 4px; padding-top: 2px; font-size: 0.85em;">`;
+    content += `抵達日：${m}/${d}（${w}）`;
+    content += `</div>`;
   }
+
+  chip.innerHTML = content;
+
+  chip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showDetailModal(row);
+  });
 
   return chip;
 }
