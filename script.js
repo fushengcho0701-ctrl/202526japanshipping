@@ -13,6 +13,7 @@ let maxContainersByGroup = {};
 
 /* 星期顯示 */
 const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+const weekdayNamesShort = ["日", "一", "二", "三", "四", "五", "六"];
 
 /* -----------------------------------------------------
    i18n Dictionary
@@ -149,12 +150,6 @@ function formatContainerWithUnit(row) {
   return `第 ${n} 櫃`;
 }
 
-/** 原本的單純數字→櫃顯示，只在需要時使用 */
-function formatContainerNo(n) {
-  if (!n || isNaN(n)) return t("emptyValue");
-  return `第 ${n} 櫃`;
-}
-
 /** 取得總量用的單位（櫃 / 捆） */
 function getTotalUnit(row) {
   return isAirShipment(row) ? "捆" : "櫃";
@@ -181,15 +176,12 @@ function setupLanguageToggle() {
 /* 日期解析 */
 function parseDateToObj(text) {
   if (!text) return null;
-
   text = text.replace(/星期[一二三四五六日天]/g, "").trim();
   text = text.replace(/\s+/g, " ");
-
   const parts = text.split(" ");
   const datePart = parts[0]?.replace(/\//g, "-");
   if (!datePart) return null;
   const timePart = parts[1] || "00:00";
-
   const d = new Date(`${datePart} ${timePart}`);
   return isNaN(d.getTime()) ? null : d;
 }
@@ -210,7 +202,6 @@ async function loadSheetData() {
   try {
     const res = await fetch(window.SHEET_CSV_URL);
     const csvText = await res.text();
-
     rawData = parseCSV(csvText);
     applyFiltersAndRender();
     renderCalendar();
@@ -219,30 +210,25 @@ async function loadSheetData() {
   }
 }
 
-/* 解析 CSV
-   欄位：船班, 櫃次, 結關日, 實際開船時間, 裝櫃時間, 抵達港口, 抵達日, SO, 檢疫官時間, 藥務號, 檢疫證號碼, 電放單
-*/
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const rows = [];
-
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const cols = lines[i].split(",");
 
     const vessel = cols[0] || "";
     const containerNo = parseInt(cols[1], 10) || 1;
-
     const clearanceText = cols[2] || "";
     const sailingText = cols[3] || "";
     const loadingText = cols[4] || "";
     const port = cols[5] || "";
     const arrivalText = cols[6] || "";
-    const soCell = cols[7] || "";
+    const soCell = (cols[7] || "").trim();
     const quarantineTime = cols[8] || "";
     const drugNo = cols[9] || "";
     const quarantineCertNo = cols[10] || "";
-    const telexCell = cols[11] || "";
+    const telexCell = (cols[11] || "").trim();
 
     const groupKey = `${vessel}__${arrivalText}`;
 
@@ -250,20 +236,17 @@ function parseCSV(text) {
       vessel,
       containerNo,
       groupKey,
-
       clearanceText,
       sailingText,
       loadingText,
       port,
       arrivalText,
-
+      // 修正：只要值是 1，就判定為 done
       soStatus: soCell === "1" ? "done" : "pending",
       telexStatus: telexCell === "1" ? "done" : "pending",
-
       quarantineTime,
       drugNo,
       quarantineCertNo,
-
       clearanceDate: parseDateToObj(clearanceText),
       sailingDate: parseDateToObj(sailingText),
       loadingDate: parseDateToObj(loadingText),
@@ -291,10 +274,7 @@ function parseCSV(text) {
    Filter + Sort
 ----------------------------------------------------- */
 function applyFiltersAndRender() {
-  const keyword = (document.getElementById("search-input")?.value || "")
-    .trim()
-    .toLowerCase();
-
+  const keyword = (document.getElementById("search-input")?.value || "").trim().toLowerCase();
   const soFilter = document.getElementById("filter-so")?.value || "all";
   const telexFilter = document.getElementById("filter-telex")?.value || "all";
 
@@ -306,18 +286,10 @@ function applyFiltersAndRender() {
       (row.quarantineCertNo || "").toLowerCase().includes(keyword);
 
     const matchSO =
-      soFilter === "all"
-        ? true
-        : soFilter === "done"
-        ? row.soStatus === "done"
-        : row.soStatus === "pending";
+      soFilter === "all" ? true : soFilter === "done" ? row.soStatus === "done" : row.soStatus === "pending";
 
     const matchTelex =
-      telexFilter === "all"
-        ? true
-        : telexFilter === "done"
-        ? row.telexStatus === "done"
-        : row.telexStatus === "pending";
+      telexFilter === "all" ? true : telexFilter === "done" ? row.telexStatus === "done" : row.telexStatus === "pending";
 
     return matchKeyword && matchSO && matchTelex;
   });
@@ -326,23 +298,13 @@ function applyFiltersAndRender() {
     filteredData.sort((a, b) => {
       const va = a[currentSortKey];
       const vb = b[currentSortKey];
-
-      if (va instanceof Date && vb instanceof Date) {
-        return currentSortOrder === "asc" ? va - vb : vb - va;
-      }
-
-      if (typeof va === "number" && typeof vb === "number") {
-        return currentSortOrder === "asc" ? va - vb : vb - va;
-      }
-
+      if (va instanceof Date && vb instanceof Date) return currentSortOrder === "asc" ? va - vb : vb - va;
+      if (typeof va === "number" && typeof vb === "number") return currentSortOrder === "asc" ? va - vb : vb - va;
       const sa = String(va ?? "").toLowerCase();
       const sb = String(vb ?? "").toLowerCase();
-      return currentSortOrder === "asc"
-        ? sa.localeCompare(sb)
-        : sb.localeCompare(sa);
+      return currentSortOrder === "asc" ? sa.localeCompare(sb) : sb.localeCompare(sa);
     });
   }
-
   renderTable();
 }
 
@@ -352,79 +314,49 @@ function applyFiltersAndRender() {
 function renderTable() {
   const tbody = document.getElementById("table-body");
   if (!tbody) return;
-
   tbody.innerHTML = "";
 
   filteredData.forEach((row) => {
     const tr = document.createElement("tr");
-
     const needMulti = row.totalContainers && row.totalContainers > 1;
     const unit = getTotalUnit(row);
-    const warnHtml = needMulti
-      ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} ${unit}</div>`
-      : "";
+    const warnHtml = needMulti ? `<div class="table-note">⚠️ 請注意需訂 ${row.totalContainers} ${unit}</div>` : "";
 
     tr.innerHTML = `
-      <td>
-        <div>${row.vessel || t("emptyValue")}</div>
-        ${warnHtml}
-      </td>
+      <td><div>${row.vessel || t("emptyValue")}</div>${warnHtml}</td>
       <td>${formatContainerWithUnit(row)}</td>
       <td>${row.clearanceText || t("emptyValue")}</td>
       <td>${row.sailingText || t("emptyValue")}</td>
       <td>${row.loadingText || t("emptyValue")}</td>
       <td>${row.port || t("emptyValue")}</td>
       <td>${row.arrivalText || t("emptyValue")}</td>
-      <td>${renderStatusChip(
-        row.soStatus === "done" ? "ok" : "bad",
-        row.soStatus === "done" ? t("statusSOdone") : t("statusSOpending")
-      )}</td>
+      <td>${renderStatusChip(row.soStatus === "done" ? "ok" : "bad", row.soStatus === "done" ? t("statusSOdone") : t("statusSOpending"))}</td>
       <td>${row.quarantineTime || t("emptyValue")}</td>
       <td>${row.drugNo || t("emptyValue")}</td>
       <td>${row.quarantineCertNo || t("emptyValue")}</td>
-      <td>${renderStatusChip(
-        row.telexStatus === "done" ? "ok" : "bad",
-        row.telexStatus === "done" ? t("statusTelexDone") : t("statusTelexPending")
-      )}</td>
+      <td>${renderStatusChip(row.telexStatus === "done" ? "ok" : "bad", row.telexStatus === "done" ? t("statusTelexDone") : t("statusTelexPending"))}</td>
     `;
-
-    tr.addEventListener("click", () => {
-      showDetailModal(row);
-    });
-
+    tr.addEventListener("click", () => showDetailModal(row));
     tbody.appendChild(tr);
   });
 }
 
 function renderStatusChip(type, text) {
-  return `
-    <span class="chip chip-${type}">
-      <span class="chip-dot"></span>${text}
-    </span>
-  `;
+  return `<span class="chip chip-${type}"><span class="chip-dot"></span>${text}</span>`;
 }
 
-/* -----------------------------------------------------
-   Sorting
------------------------------------------------------ */
 function setupSorting() {
   document.querySelectorAll("th[data-sort-key]").forEach((th) => {
     th.addEventListener("click", () => {
       const key = th.dataset.sortKey;
-
       if (key === currentSortKey) {
         currentSortOrder = currentSortOrder === "asc" ? "desc" : "asc";
       } else {
         currentSortKey = key;
         currentSortOrder = "asc";
       }
-
-      document
-        .querySelectorAll("th[data-sort-key]")
-        .forEach((el) => el.removeAttribute("data-sort-active"));
-
+      document.querySelectorAll("th[data-sort-key]").forEach((el) => el.removeAttribute("data-sort-active"));
       th.setAttribute("data-sort-active", currentSortOrder);
-
       applyFiltersAndRender();
     });
   });
@@ -440,13 +372,7 @@ function showDetailModal(row) {
   if (!backdrop || !list || !title) return;
 
   title.textContent = `${row.vessel}（${formatContainerWithUnit(row)}）`;
-
-  const totalLine =
-    row.totalContainers && row.totalContainers > 1
-      ? `<dt>${t("modalTotalContainers")}</dt><dd>${row.totalContainers} ${getTotalUnit(
-          row
-        )}</dd>`
-      : "";
+  const totalLine = row.totalContainers && row.totalContainers > 1 ? `<dt>${t("modalTotalContainers")}</dt><dd>${row.totalContainers} ${getTotalUnit(row)}</dd>` : "";
 
   list.innerHTML = `
     <dt>${t("colVessel")}</dt><dd>${row.vessel}</dd>
@@ -460,14 +386,9 @@ function showDetailModal(row) {
     <dt>${t("colQuarantineTime")}</dt><dd>${row.quarantineTime || t("emptyValue")}</dd>
     <dt>${t("colDrugNo")}</dt><dd>${row.drugNo || t("emptyValue")}</dd>
     <dt>${t("colQuarantineCertNo")}</dt><dd>${row.quarantineCertNo || t("emptyValue")}</dd>
-    <dt>${t("colSOstatus")}</dt><dd>${
-      row.soStatus === "done" ? t("statusSOdone") : t("statusSOpending")
-    }</dd>
-    <dt>${t("colTelexStatus")}</dt><dd>${
-      row.telexStatus === "done" ? t("statusTelexDone") : t("statusTelexPending")
-    }</dd>
+    <dt>${t("colSOstatus")}</dt><dd>${row.soStatus === "done" ? t("statusSOdone") : t("statusSOpending")}</dd>
+    <dt>${t("colTelexStatus")}</dt><dd>${row.telexStatus === "done" ? t("statusTelexDone") : t("statusTelexPending")}</dd>
   `;
-
   backdrop.classList.add("active");
 }
 
@@ -483,104 +404,41 @@ function renderCalendar() {
     renderWeekView(false);
   } else if (calendarView === "month") {
     renderMonthView();
-} else if (calendarView === "sailing-only") {
-    renderMonthViewSailingOnly(); // 只顯示開船事件（月視圖版）
+  } else if (calendarView === "sailing-only") {
+    renderMonthViewSailingOnly(); 
   }
-}
-function renderMonthViewSailingOnly() {
-  const grid = document.getElementById("calendar-grid");
-  const y = currentDate.getFullYear();
-  const m = currentDate.getMonth();
-
-  const first = new Date(y, m, 1);
-  const start = startOfWeek(first);
-  const days = [...Array(42)].map((_, i) => addDays(start, i));
-
-  const box = document.createElement("div");
-  box.className = "calendar-month";
-
-  days.forEach((date) => {
-    const cell = document.createElement("div");
-    cell.className = "calendar-month-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
-      weekdayNames[date.getDay()]
-    }）</div>`;
-
-    filteredData.forEach((item) => {
-      // 只顯示開船事件
-      if (isSameDate(item.sailingDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
-        );
-      }
-    });
-
-    box.appendChild(cell);
-  });
-
-  grid.appendChild(box);
-
-  const label = document.getElementById("period-label");
-  if (label) {
-    label.textContent = `${y}/${m + 1}`;
-  }
-}
-
-function addDays(date, n) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
-}
-
-/** 以「星期日」為週起始 */
-function startOfWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 = Sunday
-  const diff = d.getDate() - day; // 從星期日開始
-  return new Date(d.setDate(diff));
 }
 
 function createCalendarEventChip(row, typeClass, labelText) {
-  const chip = document.createElement("span");
+  // 修改：改用 div 以穩定區塊佈局
+  const chip = document.createElement("div");
 
-  // 設定基礎類別
   if (typeClass === "event-sailing" && isAirShipment(row)) {
     chip.className = `calendar-event event-air`;
   } else {
     chip.className = `calendar-event ${typeClass}`;
   }
 
-  // 強制修正樣式，讓它可以換行並撐開高度
-  chip.style.display = "block";      // 從 span 改為區塊元素
-  chip.style.height = "auto";       // 高度自動
-  chip.style.minHeight = "24px";    // 設定最小高度
-  chip.style.whiteSpace = "normal"; // 允許換行
-  chip.style.marginBottom = "4px";  // 方塊間距
-
   let content = `${labelText}｜${row.vessel}（${formatContainerWithUnit(row)}）`;
 
-  // 判斷是否顯示抵達日 (移除複雜判斷，先確保能顯示)
+  // 修改：在開船事件中加入抵達日加註
   if (typeClass === "event-sailing" && row.arrivalDate) {
     const arr = new Date(row.arrivalDate);
     const m = arr.getMonth() + 1;
     const d = arr.getDate();
-    const w = weekdayNames[arr.getDay()];
+    const w = weekdayNamesShort[arr.getDay()];
     
-    // 增加一個明顯的區隔線與顏色
-    content += `<div style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 4px; padding-top: 2px; font-size: 0.85em;">`;
-    content += `抵達日：${m}/${d}（${w}）`;
-    content += `</div>`;
+    content += `<div class="arrival-info-line">抵達日：${m}/${d}（${w}）</div>`;
   }
 
   chip.innerHTML = content;
-
   chip.addEventListener("click", (e) => {
     e.stopPropagation();
     showDetailModal(row);
   });
-
   return chip;
 }
 
-/** 週視圖：onlySailing=true 時只顯示開船事件並加註抵達日 */
 function renderWeekView(onlySailing = false) {
   const grid = document.getElementById("calendar-grid");
   const start = startOfWeek(currentDate);
@@ -588,14 +446,7 @@ function renderWeekView(onlySailing = false) {
 
   const header = document.createElement("div");
   header.className = "calendar-week";
-  header.innerHTML = days
-    .map(
-      (d) =>
-        `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}（${
-          weekdayNames[d.getDay()]
-        }）</div>`
-    )
-    .join("");
+  header.innerHTML = days.map((d) => `<div class="calendar-weekday">${d.getMonth() + 1}/${d.getDate()}（${weekdayNamesShort[d.getDay()]}）</div>`).join("");
   grid.appendChild(header);
 
   const row = document.createElement("div");
@@ -604,54 +455,24 @@ function renderWeekView(onlySailing = false) {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-week-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
-      weekdayNames[date.getDay()]
-    }）</div>`;
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${weekdayNamesShort[date.getDay()]}）</div>`;
 
     filteredData.forEach((item) => {
-      // 處理開船事件
       if (isSameDate(item.sailingDate, date)) {
-        const chip = createCalendarEventChip(item, "event-sailing", t("legendSailing"));
-        
-        // 如果是「只看開船」模式，額外注入抵達日資訊
-        if (onlySailing && item.arrivalDate) {
-          const arr = new Date(item.arrivalDate);
-          const arrM = arr.getMonth() + 1;
-          const arrD = arr.getDate();
-          const arrW = weekdayNames[arr.getDay()];
-          
-          // 找到 chip 內的文字容器並修改
-          const titleElem = chip.querySelector('.event-title') || chip;
-          titleElem.innerHTML = `${item.title}<div style="border-top: 1px dashed #ccc; margin-top: 4px; padding-top: 2px; color: #d93025;">新增 *抵達日* ${arrM}/${arrD}（${arrW}）</div>`;
-        }
-        
-        cell.appendChild(chip);
+        cell.appendChild(createCalendarEventChip(item, "event-sailing", t("legendSailing")));
       }
-
-      // 如果不是只看開船，才顯示獨立的「抵達」方塊
       if (!onlySailing && isSameDate(item.arrivalDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-arrival", t("legendArrival"))
-        );
+        cell.appendChild(createCalendarEventChip(item, "event-arrival", t("legendArrival")));
       }
     });
-
     row.appendChild(cell);
   });
-
   grid.appendChild(row);
 
   const label = document.getElementById("period-label");
   if (label) {
-    const startStr = `${start.getFullYear()}-${String(
-      start.getMonth() + 1
-    ).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`;
-    const end = days[6];
-    const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(end.getDate()).padStart(2, "0")}`;
-    label.textContent = `${startStr} - ${endStr}`;
+    const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    label.textContent = `${fmt(start)} - ${fmt(days[6])}`;
   }
 }
 
@@ -659,9 +480,7 @@ function renderMonthView() {
   const grid = document.getElementById("calendar-grid");
   const y = currentDate.getFullYear();
   const m = currentDate.getMonth();
-
-  const first = new Date(y, m, 1);
-  const start = startOfWeek(first);
+  const start = startOfWeek(new Date(y, m, 1));
   const days = [...Array(42)].map((_, i) => addDays(start, i));
 
   const box = document.createElement("div");
@@ -670,33 +489,59 @@ function renderMonthView() {
   days.forEach((date) => {
     const cell = document.createElement("div");
     cell.className = "calendar-month-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}（${
-      weekdayNames[date.getDay()]
-    }）</div>`;
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${weekdayNamesShort[date.getDay()]}）</div>`;
 
     filteredData.forEach((item) => {
-      // 結關事件已移除，不再顯示
       if (isSameDate(item.sailingDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-sailing", t("legendSailing"))
-        );
+        cell.appendChild(createCalendarEventChip(item, "event-sailing", t("legendSailing")));
       }
       if (isSameDate(item.arrivalDate, date)) {
-        cell.appendChild(
-          createCalendarEventChip(item, "event-arrival", t("legendArrival"))
-        );
+        cell.appendChild(createCalendarEventChip(item, "event-arrival", t("legendArrival")));
       }
     });
-
     box.appendChild(cell);
   });
-
   grid.appendChild(box);
-
   const label = document.getElementById("period-label");
-  if (label) {
-    label.textContent = `${y}/${m + 1}`;
-  }
+  if (label) label.textContent = `${y}/${m + 1}`;
+}
+
+function renderMonthViewSailingOnly() {
+  const grid = document.getElementById("calendar-grid");
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+  const start = startOfWeek(new Date(y, m, 1));
+  const days = [...Array(42)].map((_, i) => addDays(start, i));
+
+  const box = document.createElement("div");
+  box.className = "calendar-month";
+
+  days.forEach((date) => {
+    const cell = document.createElement("div");
+    cell.className = "calendar-month-cell";
+    cell.innerHTML = `<div class="day-number">${date.getDate()}（${weekdayNamesShort[date.getDay()]}）</div>`;
+
+    filteredData.forEach((item) => {
+      if (isSameDate(item.sailingDate, date)) {
+        cell.appendChild(createCalendarEventChip(item, "event-sailing", t("legendSailing")));
+      }
+    });
+    box.appendChild(cell);
+  });
+  grid.appendChild(box);
+  const label = document.getElementById("period-label");
+  if (label) label.textContent = `${y}/${m + 1}`;
+}
+
+function addDays(date, n) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
+}
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
 }
 
 /* -----------------------------------------------------
@@ -705,103 +550,55 @@ function renderMonthView() {
 document.addEventListener("DOMContentLoaded", () => {
   setupLanguageToggle();
   applyTranslations();
-
   setupSorting();
   loadSheetData();
 
-  const searchInput = document.getElementById("search-input");
-  if (searchInput) {
-    searchInput.addEventListener("input", applyFiltersAndRender);
-  }
-
-  const filterSO = document.getElementById("filter-so");
-  if (filterSO) {
-    filterSO.addEventListener("change", applyFiltersAndRender);
-  }
-
-  const filterTelex = document.getElementById("filter-telex");
-  if (filterTelex) {
-    filterTelex.addEventListener("change", applyFiltersAndRender);
-  }
+  document.getElementById("search-input")?.addEventListener("input", applyFiltersAndRender);
+  document.getElementById("filter-so")?.addEventListener("change", applyFiltersAndRender);
+  document.getElementById("filter-telex")?.addEventListener("change", applyFiltersAndRender);
 
   const tabButtons = document.querySelectorAll(".tab-button");
   const views = document.querySelectorAll(".view");
-  if (tabButtons.length && views.length) {
-    tabButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const targetId = btn.dataset.target;
-
-        tabButtons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        views.forEach((v) => v.classList.remove("active"));
-        const targetView = document.getElementById(targetId);
-        if (targetView) targetView.classList.add("active");
-
-        if (targetId === "calendar-view") {
-          renderCalendar();
-        }
-      });
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.target;
+      tabButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      views.forEach((v) => v.classList.remove("active"));
+      document.getElementById(targetId)?.classList.add("active");
+      if (targetId === "calendar-view") renderCalendar();
     });
-  }
+  });
 
   const subtabButtons = document.querySelectorAll(".subtab-button");
-  if (subtabButtons.length) {
-    subtabButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        calendarView = btn.dataset.calView || "week";
-
-        subtabButtons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        renderCalendar();
-      });
-    });
-  }
-
-  const btnPrev = document.getElementById("btn-prev-period");
-  if (btnPrev) {
-    btnPrev.addEventListener("click", () => {
-      currentDate =
-        calendarView === "week" || calendarView === "sailing-only"
-          ? addDays(currentDate, -7)
-          : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+  subtabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      calendarView = btn.dataset.calView || "week";
+      subtabButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       renderCalendar();
     });
-  }
+  });
 
-  const btnNext = document.getElementById("btn-next-period");
-  if (btnNext) {
-    btnNext.addEventListener("click", () => {
-      currentDate =
-        calendarView === "week" || calendarView === "sailing-only"
-          ? addDays(currentDate, 7)
-          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-      renderCalendar();
-    });
-  }
+  document.getElementById("btn-prev-period")?.addEventListener("click", () => {
+    currentDate = (calendarView === "week" || calendarView === "sailing-only") ? addDays(currentDate, -7) : new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    renderCalendar();
+  });
 
-  const btnToday = document.getElementById("btn-today");
-  if (btnToday) {
-    btnToday.addEventListener("click", () => {
-      currentDate = new Date();
-      renderCalendar();
-    });
-  }
+  document.getElementById("btn-next-period")?.addEventListener("click", () => {
+    currentDate = (calendarView === "week" || calendarView === "sailing-only") ? addDays(currentDate, 7) : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    renderCalendar();
+  });
+
+  document.getElementById("btn-today")?.addEventListener("click", () => {
+    currentDate = new Date();
+    renderCalendar();
+  });
 
   const modalClose = document.getElementById("modal-close-btn");
   const modalBackdrop = document.getElementById("detail-modal-backdrop");
-  if (modalClose && modalBackdrop) {
-    modalClose.addEventListener("click", () => {
-      modalBackdrop.classList.remove("active");
-    });
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) {
-        modalBackdrop.classList.remove("active");
-      }
-    });
-  }
+  modalClose?.addEventListener("click", () => modalBackdrop.classList.remove("active"));
+  modalBackdrop?.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("active"); });
 
-  // 每 3 分鐘自動重新載入資料
   setInterval(loadSheetData, 180000);
 });
