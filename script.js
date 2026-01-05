@@ -1,157 +1,162 @@
-let rawData = [];
-let filteredData = [];
-let calendarView = "month"; // 預設為月視圖
-let currentDate = new Date();
-const weekdayNamesShort = ["日", "一", "二", "三", "四", "五", "六"];
+let allData = [];
+let currentMode = "month"; // month, week, sailing
+let baseDate = new Date();
+const wNames = ["日", "一", "二", "三", "四", "五", "六"];
 
-/* 核心：建立事件 Chip 並判斷 3 天前折疊 */
-function createCalendarEventChip(row, typeClass, labelText) {
-  const chip = document.createElement("div");
-  chip.className = `calendar-event ${typeClass}`;
+/* -----------------------------------------------------
+   1. 資料獲取與解析
+----------------------------------------------------- */
+async function fetchData() {
+    try {
+        const response = await fetch(window.SHEET_CSV_URL);
+        const text = await response.text();
+        const rows = text.trim().split("\n").slice(1);
+        
+        allData = rows.map(line => {
+            const c = line.split(",");
+            return {
+                vessel: c[0] || "未知船名",
+                container: c[1] || "1",
+                sailingDate: parseDate(c[3]),
+                arrivalDate: parseDate(c[6]),
+                so: c[7]?.trim() === "1" ? "OK" : "Pending",
+                telex: c[11]?.trim() === "1" ? "OK" : "Pending",
+                port: c[5] || "",
+                raw: c
+            };
+        });
+        render();
+    } catch (err) { console.error("CSV Load Error:", err); }
+}
 
-  // 計算今天與 3 天前的界限
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const limitDate = new Date(today);
-  limitDate.setDate(today.getDate() - 3);
+function parseDate(str) {
+    if (!str) return null;
+    let clean = str.replace(/星期./g, "").trim().replace(/\//g, "-");
+    let d = new Date(clean.includes(" ") ? clean : `${clean} 00:00`);
+    return isNaN(d.getTime()) ? null : d;
+}
 
-  // 判斷是否過期 (抵達日早於 3 天前)
-  const isExpired = row.arrivalDate && row.arrivalDate < limitDate;
-
-  if (isExpired) {
-    chip.classList.add("event-expired");
-    chip.setAttribute("data-expanded", "false");
-    chip.innerHTML = `<div style="text-align:center; font-style:italic;">已過期 (點擊展開)</div>`;
+/* -----------------------------------------------------
+   2. 核心渲染
+----------------------------------------------------- */
+function render() {
+    const grid = document.getElementById("calendar-grid");
+    grid.innerHTML = "";
     
-    chip.onclick = (e) => {
-      e.stopPropagation();
-      const isExpanded = chip.getAttribute("data-expanded") === "true";
-      if (!isExpanded) {
-        renderFullEventContent(chip, row, labelText);
-        chip.setAttribute("data-expanded", "true");
-      } else {
-        chip.innerHTML = `<div style="text-align:center; font-style:italic;">已過期 (點擊展開)</div>`;
-        chip.setAttribute("data-expanded", "false");
-      }
+    // 生成星期標題列
+    const head = document.createElement("div");
+    head.className = "calendar-row";
+    head.innerHTML = wNames.map(w => `<div class="calendar-header-cell">${w}</div>`).join("");
+    grid.appendChild(head);
+
+    // 計算日期範圍
+    let days = [];
+    if (currentMode === "week") {
+        let start = new Date(baseDate);
+        start.setDate(baseDate.getDate() - baseDate.getDay());
+        for(let i=0; i<7; i++) days.push(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i));
+    } else {
+        let first = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+        let start = new Date(first.setDate(first.getDate() - first.getDay()));
+        for(let i=0; i<42; i++) days.push(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i));
+    }
+
+    // 渲染日期格
+    for (let i = 0; i < days.length; i += 7) {
+        const row = document.createElement("div");
+        row.className = "calendar-row";
+        
+        days.slice(i, i + 7).forEach(date => {
+            const cell = document.createElement("div");
+            cell.className = "calendar-cell";
+            cell.innerHTML = `<div class="day-num">${date.getDate()}</div>`;
+
+            allData.forEach(item => {
+                // 處理開船事件
+                if (isSameDay(item.sailingDate, date)) {
+                    cell.appendChild(createChip(item, "sailing", "開船"));
+                }
+                // 處理抵達事件 (只看開船模式下隱藏)
+                if (currentMode !== "sailing" && isSameDay(item.arrivalDate, date)) {
+                    cell.appendChild(createChip(item, "arrival", "抵達"));
+                }
+            });
+            row.appendChild(cell);
+        });
+        grid.appendChild(row);
+    }
+    updateLabel();
+}
+
+function createChip(item, type, label) {
+    const chip = document.createElement("div");
+    
+    // 判斷是否超過 3 天 (自動折疊)
+    const limit = new Date();
+    limit.setDate(limit.getDate() - 3);
+    const isExpired = item.arrivalDate && item.arrivalDate < limit;
+
+    if (isExpired) {
+        chip.className = "event-chip event-collapsed";
+        chip.innerText = "已結案 (點擊查看)";
+        chip.onclick = () => {
+            chip.classList.remove("event-collapsed");
+            chip.className = `event-chip ${type}`;
+            fillFullContent(chip, item, label);
+        };
+    } else {
+        chip.className = `event-chip ${type}`;
+        fillFullContent(chip, item, label);
+        chip.onclick = () => showModal(item);
+    }
+    return chip;
+}
+
+function fillFullContent(el, item, label) {
+    let html = `<strong>${label}</strong>｜${item.vessel} (${item.container})`;
+    if (item.arrivalDate) {
+        html += `<div class="arrival-line">抵達：${item.arrivalDate.getMonth()+1}/${item.arrivalDate.getDate()}</div>`;
+    }
+    el.innerHTML = html;
+}
+
+/* -----------------------------------------------------
+   3. 輔助功能
+----------------------------------------------------- */
+function isSameDay(d1, d2) {
+    return d1 && d2 && d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+}
+
+function updateLabel() {
+    const label = document.getElementById("period-label");
+    label.innerText = `${baseDate.getFullYear()}年 ${baseDate.getMonth()+1}月`;
+}
+
+function showModal(item) {
+    const m = document.getElementById("modal-backdrop");
+    document.getElementById("modal-title").innerText = item.vessel;
+    document.getElementById("modal-body").innerHTML = `
+        <p><b>櫃號：</b> 第 ${item.container} 櫃</p>
+        <p><b>抵達港口：</b> ${item.port}</p>
+        <p><b>SO 狀態：</b> ${item.so === "OK" ? "✅ 已給" : "❌ 尚未"}</p>
+        <p><b>電放單：</b> ${item.telex === "OK" ? "✅ 已給" : "❌ 尚未"}</p>
+    `;
+    m.style.display = "flex";
+}
+
+// 事件監聽
+document.getElementById("btn-prev").onclick = () => { baseDate.setMonth(baseDate.getMonth()-1); render(); };
+document.getElementById("btn-next").onclick = () => { baseDate.setMonth(baseDate.getMonth()+1); render(); };
+document.getElementById("btn-today").onclick = () => { baseDate = new Date(); render(); };
+document.getElementById("modal-close").onclick = () => document.getElementById("modal-backdrop").style.display = "none";
+
+document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentMode = btn.dataset.view;
+        render();
     };
-  } else {
-    renderFullEventContent(chip, row, labelText);
-    chip.onclick = (e) => {
-      e.stopPropagation();
-      showDetailModal(row);
-    };
-  }
-  return chip;
-}
-
-function renderFullEventContent(container, row, labelText) {
-  let html = `<strong>${labelText}</strong>｜${row.vessel}（第 ${row.containerNo} 櫃）`;
-  // 在開船方塊中自動加註抵達日
-  if (row.arrivalDate) {
-    const arr = row.arrivalDate;
-    html += `<div class="arrival-info-line">抵達日：${arr.getMonth() + 1}/${arr.getDate()}（${weekdayNamesShort[arr.getDay()]}）</div>`;
-  }
-  container.innerHTML = html;
-}
-
-/* 渲染邏輯：強制 7 天網格 */
-function renderCalendar() {
-  const grid = document.getElementById("calendar-grid");
-  if (!grid) return;
-  grid.innerHTML = "";
-
-  const y = currentDate.getFullYear();
-  const m = currentDate.getMonth();
-  const startDay = new Date(y, m, 1);
-  const start = new Date(startDay.setDate(startDay.getDate() - startDay.getDay()));
-  const days = [...Array(42)].map((_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
-
-  // 星期標題
-  const header = document.createElement("div");
-  header.className = "calendar-week";
-  header.innerHTML = weekdayNamesShort.map(w => `<div class="calendar-weekday">${w}</div>`).join("");
-  grid.appendChild(header);
-
-  const box = document.createElement("div");
-  box.className = calendarView === "week" ? "calendar-week" : "calendar-month";
-
-  const displayDays = calendarView === "week" ? days.slice(0, 7) : days;
-
-  displayDays.forEach((date) => {
-    const cell = document.createElement("div");
-    cell.className = "calendar-month-cell";
-    cell.innerHTML = `<div class="day-number">${date.getDate()}</div>`;
-
-    filteredData.forEach((item) => {
-      // 開船事件
-      if (isSameDate(item.sailingDate, date)) {
-        cell.appendChild(createCalendarEventChip(item, "event-sailing", "開船"));
-      }
-      // 只有非「只看開船」模式才顯示抵達方塊
-      if (calendarView !== "sailing-only" && isSameDate(item.arrivalDate, date)) {
-        cell.appendChild(createCalendarEventChip(item, "event-arrival", "抵達"));
-      }
-    });
-    box.appendChild(cell);
-  });
-  grid.appendChild(box);
-  document.getElementById("period-label").textContent = `${y}/${m + 1}`;
-}
-
-/* 解析 CSV 與資料載入 */
-function parseCSV(text) {
-  const lines = text.trim().split("\n");
-  return lines.slice(1).map(line => {
-    const cols = line.split(",");
-    return {
-      vessel: cols[0] || "",
-      containerNo: cols[1] || "1",
-      sailingDate: parseDateToObj(cols[3]),
-      arrivalDate: parseDateToObj(cols[6]),
-      // 電放/SO 狀態：1 為已給 (done)
-      soStatus: cols[7]?.trim() === "1" ? "done" : "pending",
-      telexStatus: cols[11]?.trim() === "1" ? "done" : "pending",
-      raw: cols
-    };
-  });
-}
-
-function parseDateToObj(text) {
-  if (!text) return null;
-  let clean = text.replace(/星期./g, "").trim().replace(/\//g, "-");
-  let d = new Date(clean.includes(" ") ? clean : `${clean} 00:00`);
-  return isNaN(d.getTime()) ? null : d;
-}
-
-function isSameDate(d1, d2) {
-  return d1 && d2 && d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
-}
-
-async function loadData() {
-  const res = await fetch(window.SHEET_CSV_URL);
-  const csvText = await res.text();
-  rawData = parseCSV(csvText);
-  filteredData = rawData;
-  renderCalendar();
-}
-
-/* 初始化事件 */
-document.addEventListener("DOMContentLoaded", () => {
-  loadData();
-  document.querySelectorAll(".subtab-button").forEach(btn => btn.onclick = () => {
-    calendarView = btn.dataset.calView;
-    document.querySelectorAll(".subtab-button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    renderCalendar();
-  });
-  document.getElementById("btn-prev-period").onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
-  document.getElementById("btn-next-period").onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
-  document.getElementById("btn-today").onclick = () => { currentDate = new Date(); renderCalendar(); };
-  document.getElementById("modal-close-btn").onclick = () => document.getElementById("detail-modal-backdrop").classList.remove("active");
 });
 
-function showDetailModal(row) {
-  document.getElementById("modal-title").textContent = row.vessel;
-  document.getElementById("modal-detail-list").innerHTML = row.raw.map((v, i) => `<dt>欄位 ${i}</dt><dd>${v}</dd>`).join("");
-  document.getElementById("detail-modal-backdrop").classList.add("active");
-}
+window.onload = fetchData;
