@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>船班追蹤系統 - 行事曆最大化版</title>
+    <title>船班訂艙追蹤系統</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
         <div class="app-header-main">
             <div class="app-logo">🚢</div>
             <div>
-                <div class="app-title" data-i18n="appTitle">船班訂艙追蹤系統</div>
-                <div class="app-subtitle" data-i18n="appSubtitle">行事曆全螢幕版</div>
+                <div class="app-title">船班訂艙追蹤系統</div>
+                <div class="app-subtitle">行事曆全螢幕監控版</div>
             </div>
         </div>
         <div class="app-header-meta">
@@ -43,7 +43,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="calendar-grid" class="calendar-grid"></div>
             </div>
         </section>
@@ -52,7 +51,7 @@
     <div class="modal-backdrop" id="detail-modal-backdrop">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title" id="modal-title">詳情</div>
+                <div class="modal-title" id="modal-title">船班詳情</div>
                 <button class="modal-close" id="modal-close-btn">&times;</button>
             </div>
             <div class="modal-body">
@@ -62,8 +61,8 @@
     </div>
 
     <script>
-        // 設定你的 CSV 網址
-        window.SHEET_CSV_URL = "你的_GOOGLE_SHEET_CSV_連結_放在這裡";
+        // 自動對接你提供的 Google Sheet 連結 (CSV 匯出格式)
+        window.SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ni-_d9dyMXszc7C1UvnRplXasceSTUcx6_vsId7RQgM/export?format=csv&gid=0";
     </script>
     <script src="script.js"></script>
 </body>
