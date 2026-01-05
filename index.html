@@ -3,65 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>船班訂艙追蹤系統</title>
+    <title>船班訂艙監控系統 v2.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="app-header">
-        <div class="app-header-main">
-            <div class="app-logo">🚢</div>
-            <div>
-                <div class="app-title">船班訂艙追蹤系統</div>
-                <div class="app-subtitle">行事曆全螢幕監控版</div>
+        <div class="header-content">
+            <div class="logo-area">
+                <span class="logo-icon">🚢</span>
+                <div>
+                    <h1>船班訂艙與檢疫追蹤</h1>
+                    <p>專業監控版 (最大化佈局)</p>
+                </div>
             </div>
-        </div>
-        <div class="app-header-meta">
-            <div class="lang-toggle">
-                <button class="lang-btn active" data-lang="zh">中</button>
-                <button class="lang-btn" data-lang="ja">日</button>
+            <div class="nav-controls">
+                <div class="calendar-nav">
+                    <button id="btn-prev" class="btn-nav">＜</button>
+                    <span id="period-label">加載中...</span>
+                    <button id="btn-next" class="btn-nav">＞</button>
+                    <button id="btn-today" class="btn-today">今天</button>
+                </div>
+                <div class="view-switcher">
+                    <button class="view-btn active" data-view="month">月視圖</button>
+                    <button class="view-btn" data-view="week">週視圖</button>
+                    <button class="view-btn" data-view="sailing">只看開船</button>
+                </div>
             </div>
         </div>
     </header>
 
     <main class="app-main">
-        <section id="calendar-view" class="view active">
-            <div class="card">
-                <div class="card-controls">
-                    <div class="controls-left">
-                        <div class="calendar-nav">
-                            <button class="btn" id="btn-prev-period">＜</button>
-                            <span class="calendar-period-label" id="period-label">載入中...</span>
-                            <button class="btn" id="btn-next-period">＞</button>
-                            <button class="btn btn-ghost" id="btn-today">今天</button>
-                        </div>
-                    </div>
-                    <div class="controls-right">
-                        <div class="calendar-tabs">
-                            <button class="subtab-button active" data-cal-view="month">月視圖</button>
-                            <button class="subtab-button" data-cal-view="week">週視圖</button>
-                            <button class="subtab-button" data-cal-view="sailing-only">只看開船</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="calendar-grid" class="calendar-grid"></div>
+        <div id="calendar-grid" class="calendar-grid">
             </div>
-        </section>
     </main>
 
-    <div class="modal-backdrop" id="detail-modal-backdrop">
+    <div id="modal-backdrop" class="modal-backdrop">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title" id="modal-title">船班詳情</div>
-                <button class="modal-close" id="modal-close-btn">&times;</button>
+                <h2 id="modal-title">船班資訊</h2>
+                <button id="modal-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <dl id="modal-detail-list"></dl>
-            </div>
+            <div id="modal-body" class="modal-body"></div>
         </div>
     </div>
 
     <script>
-        // 自動對接你提供的 Google Sheet 連結 (CSV 匯出格式)
+        // 對接你提供的 Google Sheet
         window.SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ni-_d9dyMXszc7C1UvnRplXasceSTUcx6_vsId7RQgM/export?format=csv&gid=0";
     </script>
     <script src="script.js"></script>
