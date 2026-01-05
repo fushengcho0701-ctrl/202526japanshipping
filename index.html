@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>船班監控戰情室 v3.0</title>
+    <title>船班監控戰情室 v4.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,59 +11,27 @@
         <div class="header-left">
             <span class="logo">🚢</span>
             <div>
-                <h1>船班訂艙追蹤系統</h1>
-                <p>全螢幕專業版</p>
+                <h1>船班訂艙與檢疫追蹤</h1>
+                <p>專業監控版 (最大化佈局)</p>
             </div>
         </div>
         <div class="header-right">
             <div class="view-tabs">
-                <button class="tab-btn active" data-target="table-view">列表清單</button>
-                <button class="tab-btn" data-target="calendar-view">行事曆網格</button>
+                <button class="tab-btn active" data-target="calendar-view">行事曆網格</button>
+                <button class="tab-btn" data-target="table-view">列表清單</button>
             </div>
             <input type="text" id="search-input" placeholder="搜尋船名/港口...">
         </div>
     </header>
 
     <main class="app-main">
-        <section id="table-view" class="view active">
-            <div class="table-section">
-                <h2 class="section-title">正在進行中 (未到港)</h2>
-                <div class="table-wrapper">
-                    <table id="active-table">
-                        <thead>
-                            <tr>
-                                <th>船班</th><th>櫃次</th><th>實際開船</th><th>抵達港口</th><th>抵達日</th><th>SO</th><th>電放單</th>
-                            </tr>
-                        </thead>
-                        <tbody id="active-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="table-section collapsed-section">
-                <details>
-                    <summary>已到港船班 (點擊展開歷史記錄)</summary>
-                    <div class="table-wrapper">
-                        <table id="history-table">
-                            <thead>
-                                <tr>
-                                    <th>船班</th><th>櫃次</th><th>實際開船</th><th>抵達港口</th><th>抵達日</th><th>SO</th><th>電放單</th>
-                                </tr>
-                            </thead>
-                            <tbody id="history-tbody"></tbody>
-                        </table>
-                    </div>
-                </details>
-            </div>
-        </section>
-
-        <section id="calendar-view" class="view">
+        <section id="calendar-view" class="view active">
             <div class="calendar-controls">
                 <div class="nav-group">
-                    <button id="btn-prev">＜</button>
-                    <span id="period-label"></span>
-                    <button id="btn-next">＞</button>
-                    <button id="btn-today">今天</button>
+                    <button id="btn-prev" class="btn">＜</button>
+                    <span id="period-label">加載中...</span>
+                    <button id="btn-next" class="btn">＞</button>
+                    <button id="btn-today" class="btn">今天</button>
                 </div>
                 <div class="sub-tabs">
                     <button class="sub-btn active" data-mode="month">月視圖</button>
@@ -72,6 +40,38 @@
                 </div>
             </div>
             <div id="calendar-grid" class="calendar-grid"></div>
+        </section>
+
+        <section id="table-view" class="view">
+            <div class="card table-section">
+                <h2 class="section-title">正在進行中 (未到港)</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>船班</th><th>櫃次</th><th>開船時間</th><th>抵達港口</th><th>預計抵達</th><th>SO 狀態</th><th>電放單</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card table-section collapsed-section">
+                <details>
+                    <summary>📁 已到港船班 (點擊展開歷史記錄)</summary>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>船班</th><th>櫃次</th><th>開船時間</th><th>抵達港口</th><th>抵達日</th><th>SO 狀態</th><th>電放單</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody"></tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
         </section>
     </main>
 
@@ -86,6 +86,7 @@
     </div>
 
     <script>
+        // 對接您提供的 Google Sheet 匯出路徑
         window.SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ni-_d9dyMXszc7C1UvnRplXasceSTUcx6_vsId7RQgM/export?format=csv&gid=0";
     </script>
     <script src="script.js"></script>
