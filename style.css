@@ -1,102 +1,59 @@
 :root {
-    --apple-bg: #f5f5f7;
-    --card-bg: #ffffff;
-    --text-main: #1d1d1f;
-    --text-muted: #86868b;
-    --accent: #007aff;
+    --bg: #f5f5f7;
     --border: #d2d2d7;
+    --accent: #007aff;
     --sailing: #ff9f0a;
     --arrival: #34c759;
-    --expired: #f2f2f7;
+    --text: #1d1d1f;
 }
 
 * { box-sizing: border-box; }
-body { 
-    margin: 0; padding: 0; 
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    background: var(--apple-bg); color: var(--text-main);
-}
+body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-/* 100% 寬度最大化 */
-.app-main { width: 100vw; padding: 0; margin: 0; }
+/* 最大化佈局 */
+.app-main { width: 100vw; padding: 15px; }
 
 .app-header {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border); padding: 10px 20px;
+    display: flex; justify-content: space-between; align-items: center;
     position: sticky; top: 0; z-index: 100;
-    padding: 10px 20px;
 }
 
-.header-content { display: flex; justify-content: space-between; align-items: center; }
-.logo-area { display: flex; align-items: center; gap: 15px; }
-.logo-area h1 { margin: 0; font-size: 1.1rem; }
-.logo-area p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-left h1 { margin: 0; font-size: 1.1rem; }
+.header-left p { margin: 0; font-size: 0.8rem; color: #86868b; }
 
-/* 網格系統：強制 7 欄並排 */
-.calendar-grid {
-    display: flex; flex-direction: column;
-    width: 100%; min-height: calc(100vh - 70px);
-}
+/* 列表視圖優化 */
+.table-section { background: #fff; border-radius: 12px; border: 1px solid var(--border); padding: 15px; margin-bottom: 20px; }
+.section-title { font-size: 1rem; margin-top: 0; color: var(--accent); }
+.table-wrapper { overflow-x: auto; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+th, td { padding: 12px; border-bottom: 1px solid #f2f2f7; text-align: left; font-size: 0.9rem; }
+th { background: #f9fafc; font-weight: 600; color: #86868b; }
 
-.calendar-row {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-    width: 100%;
-}
+/* 到港收納區 */
+.collapsed-section summary { padding: 10px; cursor: pointer; font-weight: 600; color: #86868b; outline: none; }
+.collapsed-section summary:hover { color: var(--text); }
 
-.calendar-header-cell {
-    background: #f9fafc; padding: 12px; text-align: center;
-    font-weight: 600; border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border); font-size: 0.85rem;
-}
-
-.calendar-cell {
-    min-height: 150px; background: #fff;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 8px; display: flex; flex-direction: column; gap: 6px;
-}
-
-.calendar-cell:last-child, .calendar-header-cell:last-child { border-right: none; }
-
-.day-num { font-weight: 700; color: var(--text-muted); margin-bottom: 5px; font-size: 0.9rem; }
+/* 行事曆 7 天橫排網格 */
+.calendar-grid { display: flex; flex-direction: column; width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fff; }
+.calendar-row { display: grid !important; grid-template-columns: repeat(7, 1fr) !important; width: 100%; }
+.cal-head { background: #f9fafc; padding: 12px; text-align: center; font-weight: 600; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.cal-cell { min-height: 150px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.cal-cell:last-child, .cal-head:last-child { border-right: none; }
 
 /* 事件方塊 */
-.event-chip {
-    padding: 6px 10px; border-radius: 8px; font-size: 0.75rem;
-    color: #fff; cursor: pointer; line-height: 1.4;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.1s;
-}
-.event-chip:hover { transform: scale(0.98); }
-.sailing { background: var(--sailing); }
-.arrival { background: var(--arrival); }
+.event-chip { padding: 6px 10px; border-radius: 8px; color: #fff; font-size: 0.75rem; cursor: pointer; line-height: 1.4; }
+.chip-sailing { background: var(--sailing); }
+.chip-arrival { background: var(--arrival); }
+.chip-expired { background: #f2f2f7 !important; color: #8e8e93 !important; border: 1px dashed #d1d1d6; font-style: italic; text-align: center; }
 
-/* 過期折疊樣式 */
-.event-collapsed {
-    background: var(--expired) !important;
-    color: #8e8e93 !important;
-    border: 1px dashed #d1d1d6;
-    padding: 4px 8px; font-size: 0.7rem; font-style: italic;
-    text-align: center;
-}
+.arrival-line { border-top: 1px dashed rgba(255,255,255,0.5); margin-top: 5px; padding-top: 5px; font-weight: 600; }
 
-.arrival-line {
-    border-top: 1px dashed rgba(255,255,255,0.5);
-    margin-top: 4px; padding-top: 4px; font-weight: 600;
-}
+/* 狀態標籤 */
+.status-ok { color: #34c759; font-weight: 700; }
+.status-pending { color: #ff3b30; font-weight: 700; }
 
-/* 控制項樣式 */
-.btn-nav, .btn-today, .view-btn {
-    padding: 6px 12px; border: 1px solid var(--border);
-    background: #fff; border-radius: 6px; cursor: pointer;
-}
-.view-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.nav-controls { display: flex; gap: 20px; align-items: center; }
-
-/* 彈窗 */
-.modal-backdrop {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    z-index: 200; align-items: center; justify-content: center;
-}
-.modal { background: #fff; border-radius: 18px; width: 90%; max-width: 500px; padding: 20px; }
+.view { display: none; }
+.view.active { display: block; }
